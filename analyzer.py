@@ -27,39 +27,45 @@ def analyze_apk(apk_path):
         "summary": {"critical":0,"high":0,"medium":0,"low":0,"total":0}
     }
 
-    # ---------- Manifest Checks ----------
+    manifest = apk.get_manifest()
 
-    if apk.debuggable:
-        add(report,"Debuggable Enabled","High","Disable android:debuggable")
+    # ---------------- Manifest Checks ----------------
 
-    if apk.allow_backup:
+    # Debuggable
+    if 'android:debuggable="true"' in manifest:
+        add(report,"Debuggable Enabled","High","Disable android:debuggable in release build")
+
+    # Allow Backup
+    if 'android:allowBackup="true"' in manifest:
         add(report,"Backup Enabled","Medium","Set allowBackup=false")
 
-    if apk.get_manifest().find("usesCleartextTraffic") != -1:
-        add(report,"Cleartext Traffic","Critical","Force HTTPS")
+    # Cleartext traffic
+    if 'usesCleartextTraffic="true"' in manifest:
+        add(report,"Cleartext Traffic Allowed","Critical","Enforce HTTPS only")
 
-    # ---------- Dangerous Permissions ----------
+    # ---------------- Dangerous Permissions ----------------
 
     for p in apk.permissions:
         short = p.split(".")[-1]
         if short in DANGEROUS_PERMS:
-            add(report,f"Dangerous Permission: {short}","Medium","Remove if not required")
+            add(report,f"Dangerous Permission: {short}","Medium","Remove if unnecessary")
 
-    # ---------- Exported Components ----------
+    # ---------------- Exported Components ----------------
 
-    for a in apk.get_activities():
-        if apk.get_activity(a).get("exported") == "true":
-            add(report,f"Exported Activity: {a}","High","Restrict exported")
+    for activity in apk.get_activities():
+        exported = apk.get_element("activity", "android:exported", activity)
+        if exported == "true":
+            add(report,f"Exported Activity: {activity}","High","Restrict exported components")
 
-    # ---------- Multi-DEX Secret Scan ----------
+    # ---------------- Multi-DEX Secret Scan ----------------
 
     with zipfile.ZipFile(apk_path) as z:
         for f in z.namelist():
             if f.endswith(".dex"):
-                data = z.read(f).decode("latin-1",errors="ignore")
-                for name,pat in SECRET_PATTERNS.items():
-                    if re.search(pat,data):
-                        add(report,f"Hardcoded {name}","Critical","Move secrets server-side")
+                data = z.read(f).decode("latin-1", errors="ignore")
+                for name, pattern in SECRET_PATTERNS.items():
+                    if re.search(pattern, data):
+                        add(report,f"Hardcoded {name}","Critical","Move secrets to backend")
 
     report["summary"]["total"] = len(report["vulnerabilities"])
     return report
