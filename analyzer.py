@@ -1,125 +1,135 @@
 from androguard.misc import AnalyzeAPK
 import re
 
+ANDROID_NS = "{http://schemas.android.com/apk/res/android}"
+
 def analyze_apk(apk_path):
-    print(f"Scanning {apk_path}...")
+    print(f"\nScanning APK: {apk_path}\n")
+
     a, d, dx = AnalyzeAPK(apk_path)
-    
+
+    print("DEX FILES FOUND:", len(d))
+    print("PERMISSIONS:", a.get_permissions())
+
     report = {
         "app_name": a.get_app_name() or "Unknown App",
         "package_name": a.get_package() or "Unknown Package",
         "vulnerabilities": []
     }
 
-    # ---------------------------------------------------------
-    # 1. MANIFEST SECURITY CHECKS (OWASP M2, M3, M7)
-    # ---------------------------------------------------------
+    # =====================================================
+    # 1. MANIFEST SECURITY CHECKS
+    # =====================================================
+
     manifest_xml = a.get_android_manifest_xml()
+
     if manifest_xml is not None:
-        application_tag = manifest_xml.find("application")
-        if application_tag is not None:
-            
-            # Check Debuggable (OWASP M7: Client Code Quality)
-            debuggable = application_tag.get("{http://schemas.android.com/apk/res/android}debuggable")
-            if debuggable == "true":
+        app_tag = manifest_xml.find("application")
+
+        if app_tag is not None:
+
+            # Debuggable
+            if app_tag.get(ANDROID_NS + "debuggable") == "true":
                 report["vulnerabilities"].append({
-                    "type": "App is Debuggable",
+                    "type": "Debuggable App",
                     "severity": "High",
-                    "owasp": "M7 (Client Code Quality)",
-                    "details": "The application is marked as debuggable. This allows attackers to easily attach debuggers and extract sensitive runtime data.",
-                    "remediation": "Set android:debuggable='false' in AndroidManifest.xml before releasing to production."
+                    "details": "Application is debuggable"
                 })
-            
-            # Check AllowBackup (OWASP M2: Insecure Data Storage)
-            allow_backup = application_tag.get("{http://schemas.android.com/apk/res/android}allowBackup")
-            if allow_backup == "true" or allow_backup is None:
+
+            # Allow Backup
+            if app_tag.get(ANDROID_NS + "allowBackup") != "false":
                 report["vulnerabilities"].append({
-                    "type": "Application Data Backup Enabled",
+                    "type": "AllowBackup Enabled",
                     "severity": "Medium",
-                    "owasp": "M2 (Insecure Data Storage)",
-                    "details": "android:allowBackup is true. An attacker with physical access or malware could extract app data via ADB backup.",
-                    "remediation": "Set android:allowBackup='false' in AndroidManifest.xml."
+                    "details": "Application data can be extracted via ADB"
                 })
 
-            # Check Cleartext Traffic (OWASP M3: Insecure Communication)
-            cleartext = application_tag.get("{http://schemas.android.com/apk/res/android}usesCleartextTraffic")
-            if cleartext == "true":
+            # Cleartext Traffic
+            if app_tag.get(ANDROID_NS + "usesCleartextTraffic") == "true":
                 report["vulnerabilities"].append({
-                    "type": "Cleartext HTTP Traffic Allowed",
+                    "type": "Cleartext Traffic Allowed",
                     "severity": "Critical",
-                    "owasp": "M3 (Insecure Communication)",
-                    "details": "The app explicitly allows unencrypted HTTP communication, making it highly vulnerable to Man-in-the-Middle (MITM) attacks.",
-                    "remediation": "Set android:usesCleartextTraffic='false' and enforce HTTPS for all connections."
+                    "details": "HTTP traffic permitted"
                 })
 
-    # ---------------------------------------------------------
-    # 2. EXCESSIVE PERMISSIONS (OWASP M1: Improper Platform Usage)
-    # ---------------------------------------------------------
-    dangerous_permissions = {
-        "android.permission.READ_SMS": "Can read all SMS messages (risk of OTP theft).",
-        "android.permission.ACCESS_FINE_LOCATION": "Tracks precise user location.",
-        "android.permission.READ_CONTACTS": "Can read the user's entire contact list.",
-        "android.permission.RECORD_AUDIO": "Can record audio without user interaction."
-    }
-    app_permissions = a.get_permissions()
-    for perm, risk in dangerous_permissions.items():
-        if perm in app_permissions:
+    # =====================================================
+    # 2. DANGEROUS PERMISSIONS
+    # =====================================================
+
+    dangerous = [
+        "android.permission.READ_SMS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_CONTACTS",
+        "android.permission.ACCESS_FINE_LOCATION"
+    ]
+
+    for perm in dangerous:
+        if perm in a.get_permissions():
             report["vulnerabilities"].append({
-                "type": f"Dangerous Permission Detected",
+                "type": "Dangerous Permission",
                 "severity": "Medium",
-                "owasp": "M1 (Improper Platform Usage)",
-                "details": f"The app requests {perm.split('.')[-1]}. {risk}",
-                "remediation": "Remove this permission if not strictly necessary. Apply the principle of least privilege."
+                "details": perm
             })
 
-    # ---------------------------------------------------------
-    # 3. EXPORTED COMPONENTS (Filtering out the main launcher)
-    # ---------------------------------------------------------
-    activities = a.get_activities()
-    for activity in activities:
-        intent_filters = a.get_intent_filters("activity", activity)
-        if intent_filters:
-            # We must check if it's the main launcher activity. If it is, it's not a vulnerability!
-            is_main_launcher = False
-            for action, names in intent_filters.items():
-                if "android.intent.action.MAIN" in names:
-                    is_main_launcher = True
-            
-            if not is_main_launcher:
+    # =====================================================
+    # 3. EXPORTED ACTIVITIES (CORRECT METHOD)
+    # =====================================================
+
+    for activity in a.get_activities():
+        if a.is_exported(activity):
+            if activity != a.get_main_activity():
                 report["vulnerabilities"].append({
-                    "type": "Improperly Exported Activity",
+                    "type": "Exported Activity",
                     "severity": "Low",
-                    "owasp": "M1 (Improper Platform Usage)",
-                    "details": f"Activity {activity} is exported and can be launched by other apps, potentially bypassing authentication.",
-                    "remediation": "Set android:exported='false' in AndroidManifest.xml unless external access is strictly required."
+                    "details": activity
                 })
 
-    # ---------------------------------------------------------
-    # 4. HARDCODED SECRETS (OWASP M9: Insecure Data Storage)
-    # ---------------------------------------------------------
+    # =====================================================
+    # 4. HARDCODED SECRETS (FIXED STRING EXTRACTION)
+    # =====================================================
+
     patterns = {
-        "AWS API Key": re.compile(r'AKIA[0-9A-Z]{16}'),
-        "Private Key": re.compile(r'-----BEGIN PRIVATE KEY-----'),
-        "Generic Password/Token": re.compile(r'(?i)(api_key|token|secret|password)["\s:=]+(["\'][a-zA-Z0-9\-_]{10,}["\'])')
+        "AWS Key": re.compile(r'AKIA[0-9A-Z]{16}'),
+        "Private Key": re.compile(r'BEGIN PRIVATE KEY'),
+        "Generic Secret": re.compile(r'(?i)(api_key|token|secret|password)["\s:=]+([A-Za-z0-9\-_]{8,})')
     }
-    
+
     strings = []
+
     for dex in d:
-        strings.extend(dex.get_strings())
-        
-    found_secrets = set() # Use a set to prevent showing the exact same key 50 times
-    for string_val in strings:
-        if isinstance(string_val, str) and len(string_val) < 200:
-            for secret_name, pattern in patterns.items():
-                if pattern.search(string_val):
-                    if string_val not in found_secrets:
-                        found_secrets.add(string_val)
+        for s in dex.get_strings():
+            strings.append(s)
+
+    print("TOTAL STRINGS:", len(strings))
+
+    found = set()
+
+    for s in strings:
+        if isinstance(s, str) and len(s) < 200:
+            for name, pattern in patterns.items():
+                if pattern.search(s):
+                    if s not in found:
+                        found.add(s)
                         report["vulnerabilities"].append({
-                            "type": f"Hardcoded {secret_name}",
+                            "type": f"Hardcoded {name}",
                             "severity": "Critical",
-                            "owasp": "M9 (Insecure Data Storage)",
-                            "details": f"Found sensitive hardcoded string: '{string_val[:40]}...'",
-                            "remediation": "Never hardcode secrets. Fetch them dynamically from a secure backend or use the Android Keystore system."
+                            "details": s[:50]
                         })
 
     return report
+
+
+# ===============================
+# Example Run
+# ===============================
+
+if __name__ == "__main__":
+    apk = "sample.apk"
+    result = analyze_apk(apk)
+
+    print("\n========== REPORT ==========\n")
+    print("App:", result["app_name"])
+    print("Package:", result["package_name"])
+
+    for v in result["vulnerabilities"]:
+        print(v)
