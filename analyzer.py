@@ -133,10 +133,18 @@ def analyze_apk(apk_path):
     
     for activity in a.get_activities():
         try:
-            # Check if activity is exported
-            if a.is_exported(activity):
+            # Check if activity has intent filters (which makes it exported)
+            intent_filters = a.get_intent_filters("activity", activity)
+            
+            if intent_filters:
                 # Skip main launcher activity
-                if activity != main_activity:
+                is_main_launcher = False
+                for action, names in intent_filters.items():
+                    if "android.intent.action.MAIN" in names:
+                        is_main_launcher = True
+                        break
+                
+                if not is_main_launcher:
                     exported_count += 1
                     _add_vulnerability(report, {
                         "type": "Improperly Exported Activity",
