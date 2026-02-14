@@ -1,4 +1,5 @@
-from androguard.misc import AnalyzeAPK
+from androguard.apk import APK
+from androguard.dex import DalvikVMFormat
 import re
 import os
 from collections import defaultdict
