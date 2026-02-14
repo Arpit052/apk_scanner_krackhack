@@ -1,5 +1,4 @@
-from androguard.core.bytecodes.apk import APK
-from androguard.core.bytecodes.dvm import DalvikVMFormat
+from androguard.misc import AnalyzeAPK
 import re
 import os
 from collections import defaultdict
@@ -13,8 +12,7 @@ def analyze_apk(apk_path):
     
     # --- OPTIMIZED LOADING ---
     try:
-        a = APK(apk_path)
-        d = [DalvikVMFormat(dex) for dex in a.get_dex()]
+        a, d, dx = AnalyzeAPK(apk_path)  # ✅ CHANGED THIS LINE
         print("✓ APK loaded successfully")
     except Exception as e:
         return {
