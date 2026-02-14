@@ -12,8 +12,9 @@ def analyze_apk(apk_path):
     print(f"🔍 Scanning {apk_path}...")
     
     # --- OPTIMIZED LOADING ---
-    try:
-        a, d, dx = AnalyzeAPK(apk_path)  # ✅ CHANGED THIS LINE
+   try:
+        a = APK(apk_path)
+        d = [DalvikVMFormat(dex) for dex in a.get_dex()]
         print("✓ APK loaded successfully")
     except Exception as e:
         return {
