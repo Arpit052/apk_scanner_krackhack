@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+python-multipart
+androguard
+jinja2
+aiofiles

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APK Security Scanner - KRACKHACK</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17; --bg-secondary: #131824; --bg-tertiary: #1a2030;
+            --accent-primary: #00d9ff; --accent-secondary: #7c3aed;
+            --accent-danger: #ef4444; --accent-warning: #f59e0b; --accent-success: #10b981;
+            --text-primary: #e5e7eb; --text-secondary: #9ca3af; --text-muted: #6b7280;
+            --border: #2d3748;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; overflow-x: hidden; transition: filter 0.3s ease;}
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; background: var(--bg-secondary); border-bottom: 2px solid var(--accent-primary); margin-bottom: 2rem; }
+        .logo { display: flex; align-items: center; gap: 0.75rem; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.2rem; }
+        .logo-text { font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; font-weight: 700; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .nav-tabs { display: flex; gap: 2rem; }
+        .nav-tab { padding: 0.5rem 0; color: var(--text-secondary); text-decoration: none; border-bottom: 2px solid transparent; transition: all 0.3s ease; font-weight: 500; cursor: pointer; }
+        .nav-tab.active { color: var(--accent-primary); border-bottom-color: var(--accent-primary); }
+        .nav-tab:hover { color: var(--text-primary); }
+        .flow-navigation { display: flex; gap: 1rem; margin-bottom: 3rem; overflow-x: auto; padding-bottom: 1rem; }
+        .flow-step { flex: 1; min-width: 200px; padding: 1rem; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.3s ease; position: relative; }
+        .flow-step.active { border-color: var(--accent-primary); background: var(--bg-tertiary); box-shadow: 0 0 20px rgba(0, 217, 255, 0.2); }
+        .flow-step-number { display: inline-block; width: 28px; height: 28px; background: var(--bg-tertiary); border: 2px solid var(--border); border-radius: 50%; text-align: center; line-height: 24px; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.875rem; margin-bottom: 0.5rem; }
+        .flow-step.active .flow-step-number { background: var(--accent-primary); color: var(--bg-primary); border-color: var(--accent-primary); }
+        .flow-step-title { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); }
+        .flow-step-desc { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem; }
+        .screen { display: none; animation: fadeIn 0.5s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .screen-title { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; background: linear-gradient(90deg, var(--text-primary), var(--accent-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .screen-subtitle { color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem; }
+        .upload-zone { background: var(--bg-secondary); border: 3px dashed var(--border); border-radius: 12px; padding: 4rem 2rem; text-align: center; transition: all 0.3s ease; cursor: pointer; margin-bottom: 2rem; }
+        .upload-zone:hover { border-color: var(--accent-primary); background: var(--bg-tertiary); }
+        .upload-icon { width: 80px; height: 80px; margin: 0 auto 1.5rem; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; opacity: 0.9; }
+        .upload-text { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .upload-subtext { color: var(--text-secondary); font-size: 0.95rem; }
+        .file-requirements { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .requirement-card { background: var(--bg-secondary); padding: 1.25rem; border-radius: 8px; border-left: 3px solid var(--accent-primary); }
+        .requirement-title { font-weight: 600; margin-bottom: 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent-primary); }
+        .requirement-desc { color: var(--text-secondary); font-size: 0.9rem; }
+        .btn { padding: 0.875rem 2rem; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; font-family: 'IBM Plex Sans', sans-serif; }
+        .btn-primary { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 217, 255, 0.3); }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 2px solid var(--border); }
+        .btn-secondary:hover { border-color: var(--accent-primary); }
+        .progress-container { background: var(--bg-secondary); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .progress-file-name { font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        .progress-status { display: flex; align-items: center; gap: 0.5rem; color: var(--accent-primary); font-weight: 600; }
+        .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .progress-bar { height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); border-radius: 4px; transition: width 0.3s ease; width: 68%; }
+        .scan-stages { display: grid; gap: 1rem; }
+        .scan-stage { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-tertiary); border-radius: 8px; border-left: 3px solid var(--border); }
+        .scan-stage.active { border-left-color: var(--accent-primary); }
+        .scan-stage.complete { border-left-color: var(--accent-success); }
+        .stage-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); font-size: 1.25rem; }
+        .stage-title { font-weight: 600; margin-bottom: 0.25rem; }
+        .stage-desc { font-size: 0.875rem; color: var(--text-secondary); }
+        .results-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .summary-card { background: var(--bg-secondary); padding: 1.5rem; border-radius: 12px; border-top: 4px solid var(--border); text-align: center; }
+        .summary-card.critical { border-top-color: var(--accent-danger); }
+        .summary-card.high { border-top-color: var(--accent-warning); }
+        .summary-card.medium { border-top-color: #3b82f6; }
+        .summary-card.low { border-top-color: var(--accent-success); }
+        .summary-number { font-size: 2.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin-bottom: 0.5rem; }
+        .summary-label { color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .filters-bar { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .filter-btn { padding: 0.625rem 1.25rem; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 8px; color: var(--text-primary); font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
+        .filter-btn.active { background: var(--bg-tertiary); border-color: var(--accent-primary); color: var(--accent-primary); }
+        .vulnerabilities-list { display: grid; gap: 1rem; }
+        .vulnerability-card { background: var(--bg-secondary); border-radius: 12px; padding: 1.5rem; border-left: 4px solid var(--border); transition: all 0.3s ease; cursor: pointer; }
+        .vulnerability-card:hover { background: var(--bg-tertiary); transform: translateX(4px); }
+        .vulnerability-card.critical { border-left-color: var(--accent-danger); }
+        .vulnerability-card.high { border-left-color: var(--accent-warning); }
+        .vulnerability-card.medium { border-left-color: #3b82f6; }
+        .vulnerability-card.low { border-left-color: var(--accent-success); }
+        .vulnerability-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; }
+        .vulnerability-title { font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .vulnerability-meta { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .meta-tag { padding: 0.25rem 0.75rem; background: var(--bg-tertiary); border-radius: 4px; font-size: 0.8rem; font-weight: 500; font-family: 'JetBrains Mono', monospace; }
+        .severity-badge { padding: 0.375rem 0.875rem; border-radius: 6px; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .severity-badge.critical { background: rgba(239, 68, 68, 0.2); color: var(--accent-danger); }
+        .severity-badge.high { background: rgba(245, 158, 11, 0.2); color: var(--accent-warning); }
+        .severity-badge.medium { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .severity-badge.low { background: rgba(16, 185, 129, 0.2); color: var(--accent-success); }
+        .vulnerability-description { color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.6; }
+        .vulnerability-details { display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+        .vulnerability-card.expanded .vulnerability-details { display: block; }
+        .detail-section { margin-bottom: 1.5rem; }
+        .detail-title { font-weight: 600; margin-bottom: 0.75rem; color: var(--accent-primary); font-size: 0.95rem; }
+        .export-section { background: var(--bg-secondary); padding: 2rem; border-radius: 12px; margin-top: 2rem; }
+        .export-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; }
+        .export-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .export-option { padding: 1.25rem; background: var(--bg-tertiary); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.3s ease; text-align: center; }
+        .export-option:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
+        .export-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+        .export-label { font-weight: 600; }
+        .action-buttons { display: flex; gap: 1rem; margin-top: 2rem; }
+
+        /* --- PRO MODALS & TOGGLES --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 14, 23, 0.8); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: all 0.3s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 500px; padding: 2rem; transform: translateY(20px); transition: all 0.3s ease; box-shadow: 0 10px 40px rgba(0,217,255,0.1); }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        .modal-close { cursor: pointer; color: var(--text-secondary); font-size: 1.8rem; line-height: 1; transition: 0.2s;}
+        .modal-close:hover { color: var(--accent-danger); }
+        
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-tertiary); transition: .4s; border-radius: 34px; border: 1px solid var(--border); }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--text-secondary); transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: rgba(0, 217, 255, 0.2); border-color: var(--accent-primary);}
+        input:checked + .slider:before { transform: translateX(24px); background-color: var(--accent-primary);}
+        .history-item { background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; border-left: 3px solid var(--accent-primary); display: flex; justify-content: space-between; align-items: center;}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">🛡️</div>
+            <div class="logo-text">APK SecScan</div>
+        </div>
+        <nav class="nav-tabs">
+            <a class="nav-tab active">Scanner</a>
+            <a class="nav-tab">History</a>
+            <a class="nav-tab">Documentation</a>
+            <a class="nav-tab">Settings</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="flow-navigation">
+            <div class="flow-step active" data-step="1">
+                <div class="flow-step-number">1</div>
+                <div class="flow-step-title">Upload APK</div>
+                <div class="flow-step-desc">Select file to scan</div>
+            </div>
+            <div class="flow-step" data-step="2">
+                <div class="flow-step-number">2</div>
+                <div class="flow-step-title">Scanning</div>
+                <div class="flow-step-desc">Static analysis in progress</div>
+            </div>
+            <div class="flow-step" data-step="3">
+                <div class="flow-step-number">3</div>
+                <div class="flow-step-title">Results</div>
+                <div class="flow-step-desc">View vulnerabilities</div>
+            </div>
+            <div class="flow-step" data-step="4">
+                <div class="flow-step-number">4</div>
+                <div class="flow-step-title">Remediation</div>
+                <div class="flow-step-desc">Fix vulnerabilities</div>
+            </div>
+            <div class="flow-step" data-step="5">
+                <div class="flow-step-number">5</div>
+                <div class="flow-step-title">Export</div>
+                <div class="flow-step-desc">Generate report</div>
+            </div>
+        </div>
+
+        <div class="screen active" id="screen-1">
+            <h1 class="screen-title">Upload APK File</h1>
+            <p class="screen-subtitle">Start your security analysis by uploading an Android application package</p>
+            <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                <input type="file" id="fileInput" style="display: none;" accept=".apk">
+                <div class="upload-icon">📦</div>
+                <div class="upload-text">Drag & drop your APK file here</div>
+                <div class="upload-subtext">or click to browse</div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary">Start Scan</button>
+                <button class="btn btn-secondary">Load Sample APK</button>
+            </div>
+        </div>
+
+        <div class="screen" id="screen-2">
+            <h1 class="screen-title">Scanning in Progress</h1>
+            <p class="screen-subtitle">Performing comprehensive static analysis on your APK</p>
+            <div class="progress-container">
+                <div class="progress-header">
+                    <div class="progress-file-name">app.apk</div>
+                    <div class="progress-status"><div class="spinner"></div><span>Analyzing...</span></div>
+                </div>
+                <div class="progress-bar"><div class="progress-bar-fill"></div></div>
+                <div class="scan-stages">
+                    <div class="scan-stage active"><div class="stage-icon">⚙️</div><div class="stage-info"><div class="stage-title">Code Analysis</div><div class="stage-desc">Scanning source code for security vulnerabilities</div></div></div>
+                </div>
+            </div>
+            <div class="action-buttons"><button class="btn btn-secondary">Cancel Scan</button></div>
+        </div>
+
+        <div class="screen" id="screen-3">
+            <h1 class="screen-title">Security Analysis Results</h1>
+            <p class="screen-subtitle">Scan completed</p>
+            <div class="results-summary">
+                <div class="summary-card critical"><div class="summary-number">0</div><div class="summary-label">Critical</div></div>
+                <div class="summary-card high"><div class="summary-number">0</div><div class="summary-label">High</div></div>
+                <div class="summary-card medium"><div class="summary-number">0</div><div class="summary-label">Medium</div></div>
+                <div class="summary-card low"><div class="summary-number">0</div><div class="summary-label">Low</div></div>
+            </div>
+            <div class="filters-bar">
+                <button class="filter-btn active">All Vulnerabilities</button>
+                <button class="filter-btn">Critical</button>
+                <button class="filter-btn">High</button>
+                <button class="filter-btn">Medium</button>
+                <button class="filter-btn">Low</button>
+            </div>
+            <div class="vulnerabilities-list"></div>
+            <div class="action-buttons"><button class="btn btn-primary" onclick="nextScreen()">Continue to Export</button></div>
+        </div>
+
+        <div class="screen" id="screen-4">
+            <h1 class="screen-title">Remediation Guide</h1>
+            <p class="screen-subtitle">Detailed fixes are included in the results cards. Proceed to export.</p>
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="prevScreen()">Back to Results</button>
+                <button class="btn btn-primary" onclick="nextScreen()">Export Report</button>
+            </div>
+        </div>
+
+        <div class="screen" id="screen-5">
+            <h1 class="screen-title">Export Security Report</h1>
+            <p class="screen-subtitle">Generate comprehensive documentation for your team</p>
+            <div class="export-section">
+                <div class="export-title">Select Report Format</div>
+                <div class="export-options">
+                    <div class="export-option" style="border-color: var(--accent-primary);"><div class="export-icon">📄</div><div class="export-label">PDF Report</div></div>
+                    <div class="export-option"><div class="export-icon">📊</div><div class="export-label">Excel Spreadsheet</div></div>
+                    <div class="export-option"><div class="export-icon">📝</div><div class="export-label">JSON Data</div></div>
+                    <div class="export-option"><div class="export-icon">🔗</div><div class="export-label">HTML Report</div></div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="prevScreen()">Back</button>
+                <button class="btn btn-primary">Generate & Download Report</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="screen-title" style="font-size: 1.5rem; margin:0;">Scan History</h2>
+                <span class="modal-close" onclick="closeModals()">&times;</span>
+            </div>
+            <div id="historyList" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="screen-title" style="font-size: 1.5rem; margin:0;">Scanner Settings</h2>
+                <span class="modal-close" onclick="closeModals()">&times;</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div><strong style="color: var(--text-primary);">Deep Heuristic Scan</strong><br><small style="color: var(--text-secondary);">Enable advanced analysis</small></div>
+                <label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div><strong style="color: var(--text-primary);">High Contrast Mode</strong><br><small style="color: var(--text-secondary);">Toggle visual theme</small></div>
+                <label class="toggle-switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScreen = 1;
+        let selectedFile = null;
+        let currentScanData = null; 
+        let scanController = null;
+
+        function goToScreen(step) {
+            document.getElementById(`screen-${currentScreen}`).classList.remove('active');
+            document.querySelector(`.flow-step[data-step="${currentScreen}"]`).classList.remove('active');
+            currentScreen = step;
+            document.getElementById(`screen-${currentScreen}`).classList.add('active');
+            document.querySelector(`.flow-step[data-step="${currentScreen}"]`).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.nextScreen = function() { if (currentScreen < 5) goToScreen(currentScreen + 1); }
+        window.prevScreen = function() { if (currentScreen > 1) goToScreen(currentScreen - 1); }
+
+        document.querySelectorAll('.flow-step').forEach(step => {
+            step.addEventListener('click', function() { goToScreen(parseInt(this.dataset.step)); });
+        });
+
+        // Modals & Nav Tabs
+        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
+        
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tabName = this.textContent.trim();
+                if (tabName === 'Scanner') {
+                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    closeModals();
+                } else if (tabName === 'History') {
+                    const history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+                    const historyDiv = document.getElementById('historyList');
+                    if (history.length === 0) historyDiv.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No scans executed yet.</p>';
+                    else historyDiv.innerHTML = history.reverse().map(h => `<div class="history-item"><div><strong style="color:var(--text-primary)">${h.app}</strong><br><small style="color:var(--text-secondary)">${h.date}</small></div><span class="severity-badge ${h.issues > 0 ? 'critical' : 'low'}">${h.issues} Issues</span></div>`).join('');
+                    document.getElementById('historyModal').classList.add('active');
+                } else if (tabName === 'Settings') {
+                    document.getElementById('settingsModal').classList.add('active');
+                } else if (tabName === 'Documentation') {
+                    window.open('https://owasp.org/www-project-mobile-top-10/', '_blank');
+                }
+            });
+        });
+
+        document.getElementById('themeToggle').addEventListener('change', function() {
+            document.body.style.filter = this.checked ? 'invert(1) hue-rotate(180deg)' : 'none';
+        });
+        window.onclick = function(event) { if (event.target.classList.contains('modal-overlay')) closeModals(); }
+
+        // File Upload
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                selectedFile = e.target.files[0];
+                document.querySelector('.upload-text').textContent = selectedFile.name;
+                document.querySelector('.upload-subtext').textContent = "File selected! Click 'Start Scan'.";
+            }
+        });
+
+        const loadSampleBtn = document.querySelectorAll('#screen-1 .btn-secondary')[0];
+        if(loadSampleBtn) {
+            loadSampleBtn.onclick = function() {
+                const content = new Blob(["dummy content"], { type: "application/vnd.android.package-archive" });
+                selectedFile = new File([content], "DamnVulnerableBank_Sample.apk", { type: "application/vnd.android.package-archive" });
+                document.querySelector('.upload-text').textContent = selectedFile.name;
+                document.querySelector('.upload-subtext').textContent = "Sample APK loaded! Hit 'Start Scan'.";
+            };
+        }
+
+        // Scan Logic
+        document.querySelector('#screen-1 .btn-primary').onclick = async function(e) {
+            e.preventDefault(); 
+            if (!selectedFile) { alert("Please select an APK file first!"); return; }
+            goToScreen(2); 
+            document.querySelector('.progress-file-name').textContent = selectedFile.name;
+            currentScanData = null;
+            
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+            scanController = new AbortController();
+
+            try {
+                const response = await fetch('/analyze', { method: 'POST', body: formData, signal: scanController.signal });
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                currentScanData = data; 
+                let history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+                history.push({ date: new Date().toLocaleDateString(), app: data.package_name || selectedFile.name, issues: data.vulnerabilities ? data.vulnerabilities.length : 0 });
+                localStorage.setItem('scanHistory', JSON.stringify(history));
+                
+                renderRealResults(data);
+                goToScreen(3); 
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('Scan failed:', error);
+                    alert('Analysis failed. Check if Python server is running!');
+                    goToScreen(1);
+                }
+            }
+        };
+
+        const cancelBtn = document.querySelectorAll('#screen-2 .btn-secondary')[0];
+        if(cancelBtn) {
+            cancelBtn.onclick = function() {
+                if(scanController) scanController.abort(); 
+                goToScreen(1);
+                document.querySelector('.upload-subtext').textContent = "Scan cancelled. Select a file to try again.";
+            };
+        }
+
+        function renderRealResults(data) {
+            const resultsContainer = document.querySelector('.vulnerabilities-list');
+            resultsContainer.innerHTML = ''; 
+            document.querySelector('#screen-3 .screen-subtitle').textContent = `Scan completed for ${data.package_name || selectedFile.name}`;
+
+            let counts = { Critical: 0, High: 0, Medium: 0, Low: 0 };
+
+            if (!data.vulnerabilities || data.vulnerabilities.length === 0) {
+                resultsContainer.innerHTML = '<p style="color: var(--accent-success); font-size: 1.2rem; padding: 2rem; text-align: center;">No vulnerabilities detected! 🛡️</p>';
+            } else {
+                data.vulnerabilities.forEach(vuln => {
+                    let sev = vuln.severity;
+                    if (counts[sev] !== undefined) counts[sev]++;
+                    let cssClass = sev === 'Critical' ? 'critical' : (sev === 'High' ? 'high' : (sev === 'Medium' ? 'medium' : 'low'));
+
+                    resultsContainer.innerHTML += `
+                        <div class="vulnerability-card ${cssClass}" onclick="this.classList.toggle('expanded')">
+                            <div class="vulnerability-header">
+                                <div>
+                                    <div class="vulnerability-title">${vuln.type}</div>
+                                    <div class="vulnerability-meta"><span class="meta-tag">OWASP: ${vuln.owasp}</span></div>
+                                </div>
+                                <div class="severity-badge ${cssClass}">${sev}</div>
+                            </div>
+                            <div class="vulnerability-description">${vuln.details}</div>
+                            <div class="vulnerability-details">
+                                <div class="detail-section">
+                                    <div class="detail-title">Remediation Steps</div>
+                                    <div style="color: var(--accent-success); font-weight: 500;">✓ ${vuln.remediation}</div>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            }
+            
+            document.querySelector('.summary-card.critical .summary-number').textContent = counts.Critical;
+            document.querySelector('.summary-card.high .summary-number').textContent = counts.High;
+            document.querySelector('.summary-card.medium .summary-number').textContent = counts.Medium;
+            document.querySelector('.summary-card.low .summary-number').textContent = counts.Low;
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const filterType = this.textContent.trim().toLowerCase();
+                document.querySelectorAll('.vulnerability-card').forEach(card => {
+                    if (filterType === 'all vulnerabilities') card.style.display = 'block';
+                    else card.style.display = card.classList.contains(filterType) ? 'block' : 'none';
+                });
+            });
+        });
+
+        let selectedExportFormat = 'pdf'; 
+        document.querySelectorAll('.export-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.export-option').forEach(opt => opt.style.borderColor = 'var(--border)');
+                this.style.borderColor = 'var(--accent-primary)';
+                const labelText = this.querySelector('.export-label').textContent.toLowerCase();
+                if (labelText.includes('json')) selectedExportFormat = 'json';
+                else if (labelText.includes('html')) selectedExportFormat = 'html';
+                else if (labelText.includes('excel')) selectedExportFormat = 'csv';
+                else selectedExportFormat = 'pdf';
+            });
+        });
+
+        const downloadBtn = document.querySelectorAll('#screen-5 .btn-primary')[0];
+        if(downloadBtn) {
+            downloadBtn.onclick = function() {
+                if (!currentScanData) { alert("No scan data available! Please run a scan first."); return; }
+                const appName = currentScanData.package_name || 'AEGIS_Scan';
+                
+                if (selectedExportFormat === 'pdf') {
+                    goToScreen(3);
+                    document.querySelector('.filters-bar').style.display = 'none';
+                    setTimeout(() => { window.print(); document.querySelector('.filters-bar').style.display = 'flex'; }, 500);
+                    return;
+                }
+
+                let fileContent, fileName, mimeType;
+                if (selectedExportFormat === 'json') {
+                    fileContent = JSON.stringify(currentScanData, null, 4);
+                    fileName = `${appName}_report.json`;
+                    mimeType = "application/json";
+                } else if (selectedExportFormat === 'html') {
+                    fileContent = `<html><body style="font-family:sans-serif; padding:2rem; background:#111; color:#eee;"><h1 style="color:#00d9ff">AEGIS Security Report</h1><h2>Target: ${appName}</h2><p>Total Vulnerabilities: ${currentScanData.vulnerabilities.length}</p><hr>${currentScanData.vulnerabilities.map(v => `<div style="background:#222; padding:1rem; margin-bottom:1rem; border-left:4px solid red;"><h3>${v.type} <span style="font-size:0.8em; color:#aaa;">(OWASP: ${v.owasp})</span></h3><p>${v.details}</p><p style="color:#10b981;"><b>Remediation:</b> ${v.remediation}</p></div>`).join('')}</body></html>`;
+                    fileName = `${appName}_report.html`;
+                    mimeType = "text/html";
+                } else if (selectedExportFormat === 'csv') {
+                    let csv = "Type,Severity,OWASP,Details,Remediation\n";
+                    if(currentScanData.vulnerabilities) currentScanData.vulnerabilities.forEach(v => { csv += `"${v.type}","${v.severity}","${v.owasp}","${v.details}","${v.remediation}"\n`; });
+                    fileContent = csv;
+                    fileName = `${appName}_report.csv`;
+                    mimeType = "text/csv";
+                }
+
+                const blob = new Blob([fileContent], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.textContent = "✓ Report Exported!";
+                setTimeout(() => { this.textContent = "Generate & Download Report"; }, 2000);
+            };
+        }
+    </script>
+</body>
+</html>
