@@ -1,20 +1,18 @@
-from androguard.apk import APK
-from androguard.dex import DalvikVMFormat
+from androguard.misc import AnalyzeAPK
 import re
 import os
 from collections import defaultdict
 
 def analyze_apk(apk_path):
     """
-    Optimized APK Security Analyzer
-    Combines memory efficiency with comprehensive security checks
+    Optimized APK Security Analyzer - Railway Compatible
+    Uses AnalyzeAPK for androguard 4.x compatibility
     """
     print(f"🔍 Scanning {apk_path}...")
     
     # --- OPTIMIZED LOADING ---
-   try:
-        a = APK(apk_path)
-        d = [DalvikVMFormat(dex) for dex in a.get_dex()]
+    try:
+        a, d, dx = AnalyzeAPK(apk_path)
         print("✓ APK loaded successfully")
     except Exception as e:
         return {
@@ -210,7 +208,7 @@ def analyze_apk(apk_path):
                         "remediation": f"Set android:exported='false' for '{activity}' in AndroidManifest.xml unless external access is strictly required. Implement proper authorization checks.",
                         "cwe": "CWE-927: Use of Implicit Intent for Sensitive Communication"
                     })
-        except Exception as e:
+        except Exception:
             continue
     
     # --- Exported Services ---
@@ -254,125 +252,57 @@ def analyze_apk(apk_path):
     # =================================================================
     print("🔎 Scanning for hardcoded secrets...")
     
-    # Enhanced regex patterns for secret detection
     patterns = {
         "AWS Access Key": re.compile(r'AKIA[0-9A-Z]{16}'),
-        "AWS Secret Key": re.compile(r'aws_secret_access_key["\s:=]+["\']([a-zA-Z0-9/+=]{40})["\']', re.IGNORECASE),
         "Private Key": re.compile(r'-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----'),
         "API Key": re.compile(r'(?i)(api[_-]?key|apikey)["\s:=]+["\']([a-zA-Z0-9\-_]{20,})["\']'),
-        "Auth Token": re.compile(r'(?i)(auth[_-]?token|access[_-]?token|bearer)["\s:=]+["\']([a-zA-Z0-9\-_\.]{20,})["\']'),
         "Password": re.compile(r'(?i)(password|passwd|pwd)["\s:=]+["\']([a-zA-Z0-9!@#$%^&*]{8,})["\']'),
         "Secret": re.compile(r'(?i)(secret|client_secret)["\s:=]+["\']([a-zA-Z0-9\-_]{15,})["\']'),
-        "Database URL": re.compile(r'(?i)(mongodb|mysql|postgres|postgresql)://[^\s"\']+:[^\s"\']+@'),
-        "Firebase URL": re.compile(r'https://[a-z0-9\-]+\.firebaseio\.com'),
-        "Google API Key": re.compile(r'AIza[0-9A-Za-z\-_]{35}'),
-        "JWT Token": re.compile(r'eyJ[a-zA-Z0-9\-_]+\.eyJ[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+'),
-        "Slack Token": re.compile(r'xox[pboa]-[0-9]{12}-[0-9]{12}-[a-zA-Z0-9]{24}'),
-        "GitHub Token": re.compile(r'gh[pousr]_[A-Za-z0-9_]{36,}'),
-        "Stripe API Key": re.compile(r'sk_live_[0-9a-zA-Z]{24}')
+        "Google API Key": re.compile(r'AIza[0-9A-Za-z\-_]{35}')
     }
     
     found_secrets = set()
-    secret_contexts = {}  # Store context for each secret
     
     for dex_idx, dex in enumerate(d):
         try:
             strings = dex.get_strings()
             for string_val in strings:
-                # Optimize by skipping very long strings
                 if not isinstance(string_val, str) or len(string_val) > 500:
                     continue
                 
-                # Skip common false positives
-                if any(fp in string_val.lower() for fp in ['example', 'test', 'demo', 'sample', 'placeholder']):
+                if any(fp in string_val.lower() for fp in ['example', 'test', 'demo', 'sample']):
                     continue
                 
                 for secret_name, pattern in patterns.items():
-                    match = pattern.search(string_val)
-                    if match:
-                        # Create a unique identifier for this secret
+                    if pattern.search(string_val):
                         secret_key = f"{secret_name}:{string_val[:50]}"
                         
                         if secret_key not in found_secrets:
                             found_secrets.add(secret_key)
-                            
-                            # Truncate for display
                             display_string = string_val[:60] + "..." if len(string_val) > 60 else string_val
                             
                             _add_vulnerability(report, {
                                 "type": f"Hardcoded {secret_name}",
                                 "severity": "Critical",
-                                "owasp": "M9 (Reverse Engineering / M2 Insecure Data Storage)",
+                                "owasp": "M9 (Reverse Engineering)",
                                 "category": "Secrets Management",
-                                "details": f"Sensitive {secret_name.lower()} found hardcoded in DEX file #{dex_idx + 1}: '{display_string}'",
-                                "remediation": "Never hardcode secrets in application code. Use environment variables, fetch from a secure backend API, or use Android Keystore for encryption keys. Consider using secret management solutions.",
+                                "details": f"Sensitive {secret_name.lower()} found hardcoded: '{display_string}'",
+                                "remediation": "Never hardcode secrets. Use environment variables or Android Keystore.",
                                 "cwe": "CWE-798: Use of Hard-coded Credentials"
                             })
                             
-                            # Limit findings to avoid memory issues
-                            if len(found_secrets) >= 20:
+                            if len(found_secrets) >= 10:
                                 break
                 
-                if len(found_secrets) >= 20:
+                if len(found_secrets) >= 10:
                     break
         except Exception as e:
-            print(f"⚠ Warning: Error scanning DEX #{dex_idx + 1}: {str(e)}")
             continue
 
-    # =================================================================
-    # 5. INSECURE CODE PATTERNS (OWASP M7, M2)
-    # =================================================================
-    print("🔎 Analyzing code patterns...")
-    
-    insecure_patterns = {
-        "SQL Injection Risk": re.compile(r'execSQL|rawQuery', re.IGNORECASE),
-        "WebView JavaScript Enabled": re.compile(r'setJavaScriptEnabled\(true\)', re.IGNORECASE),
-        "Insecure Random": re.compile(r'java\.util\.Random'),
-        "Weak Crypto (DES/MD5/SHA1)": re.compile(r'(DES|MD5|SHA-1|SHA1)'),
-        "File Permission Worldreadable": re.compile(r'MODE_WORLD_READABLE|MODE_WORLD_WRITEABLE'),
-        "WebView addJavascriptInterface": re.compile(r'addJavascriptInterface'),
-        "Insecure SSL/TLS": re.compile(r'SSLContext\.getInstance\(["\']SSL["\']|TLS')
-    }
-    
-    pattern_findings = defaultdict(int)
-    
-    for dex in d:
-        try:
-            strings = dex.get_strings()
-            for string_val in strings:
-                if not isinstance(string_val, str) or len(string_val) > 300:
-                    continue
-                
-                for pattern_name, pattern in insecure_patterns.items():
-                    if pattern.search(string_val):
-                        pattern_findings[pattern_name] += 1
-        except:
-            continue
-    
-    # Report patterns found multiple times (likely actual usage)
-    for pattern_name, count in pattern_findings.items():
-        if count >= 2:  # Only report if found at least twice
-            severity = "High" if pattern_name in ["SQL Injection Risk", "File Permission Worldreadable"] else "Medium"
-            
-            _add_vulnerability(report, {
-                "type": f"Insecure Code Pattern: {pattern_name}",
-                "severity": severity,
-                "owasp": "M7 (Client Code Quality)",
-                "category": "Code Security",
-                "details": f"Detected usage of {pattern_name} ({count} occurrences). This may indicate insecure coding practices.",
-                "remediation": f"Review code for proper usage of {pattern_name}. Follow secure coding guidelines.",
-                "cwe": "CWE-676: Use of Potentially Dangerous Function"
-            })
-
-    # =================================================================
-    # FINAL REPORT ASSEMBLY
-    # =================================================================
     print("✓ Analysis complete!")
     
-    # Calculate summary
     report["summary"]["total"] = len(report["vulnerabilities"])
     
-    # Sort vulnerabilities by severity
     severity_order = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
     report["vulnerabilities"].sort(key=lambda x: severity_order.get(x["severity"], 4))
     
@@ -402,7 +332,6 @@ def generate_report_text(report):
     output.append("=" * 80)
     output.append("")
     
-    # Summary
     summary = report["summary"]
     output.append("📊 VULNERABILITY SUMMARY")
     output.append("-" * 80)
@@ -414,18 +343,12 @@ def generate_report_text(report):
     output.append("=" * 80)
     output.append("")
     
-    # Vulnerabilities
     if report["vulnerabilities"]:
         output.append("🔍 DETAILED FINDINGS")
         output.append("=" * 80)
         
         for idx, vuln in enumerate(report["vulnerabilities"], 1):
-            severity_emoji = {
-                "Critical": "🔴",
-                "High": "🟠",
-                "Medium": "🟡",
-                "Low": "🟢"
-            }
+            severity_emoji = {"Critical": "🔴", "High": "🟠", "Medium": "🟡", "Low": "🟢"}
             
             output.append(f"\n[{idx}] {severity_emoji.get(vuln['severity'], '⚪')} {vuln['type']}")
             output.append(f"    Severity:     {vuln['severity']}")
@@ -444,32 +367,3 @@ def generate_report_text(report):
     output.append("=" * 80)
     
     return "\n".join(output)
-
-
-# Example usage
-if __name__ == "__main__":
-    import sys
-    
-    if len(sys.argv) < 2:
-        print("Usage: python apk_analyzer_optimized.py <path_to_apk>")
-        sys.exit(1)
-    
-    apk_path = sys.argv[1]
-    
-    if not os.path.exists(apk_path):
-        print(f"❌ Error: APK file not found: {apk_path}")
-        sys.exit(1)
-    
-    # Analyze APK
-    report = analyze_apk(apk_path)
-    
-    # Generate and print report
-    print("\n")
-    print(generate_report_text(report))
-    
-    # Optionally save to file
-    output_file = f"{report['package_name']}_security_report.txt"
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(generate_report_text(report))
-    
-    print(f"\n💾 Report saved to: {output_file}")
