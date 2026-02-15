@@ -13,7 +13,6 @@ app = FastAPI(
     version="2.0"
 )
 
-# CORS middleware for cross-origin requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,23 +21,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ============================================================================
-# PERFORMANCE OPTIMIZATIONS
-# ============================================================================
-
-# 1. Increase max file size to 300MB (from 50MB)
-MAX_FILE_SIZE = 300 * 1024 * 1024  # 300MB in bytes
-
-# 2. Streaming upload for large files (prevents memory overflow)
-CHUNK_SIZE = 1024 * 1024  # 1MB chunks
-
-# 3. Temporary directory for uploads (faster than default /tmp on some systems)
+MAX_FILE_SIZE = 300 * 1024 * 1024  
+CHUNK_SIZE = 1024 * 1024  
 UPLOAD_DIR = "/tmp/apk_uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# ============================================================================
-# ENDPOINTS
-# ============================================================================
+
 
 @app.get("/")
 async def read_index():
@@ -72,11 +60,8 @@ async def analyze_endpoint(file: UploadFile = File(...)):
     temp_filename = None
     
     try:
-        # ========================================
-        # STEP 1: VALIDATION (Fast pre-checks)
-        # ========================================
         
-        # Check file extension
+        
         if not file.filename.endswith('.apk'):
             raise HTTPException(
                 status_code=400, 
@@ -87,24 +72,18 @@ async def analyze_endpoint(file: UploadFile = File(...)):
         print(f"📥 NEW UPLOAD: {file.filename}")
         print(f"{'='*70}")
         
-        # ========================================
-        # STEP 2: STREAMING UPLOAD (Memory efficient)
-        # ========================================
-        
-        # Generate unique filename with timestamp
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         temp_filename = os.path.join(UPLOAD_DIR, f"apk_{timestamp}_{file.filename}")
         
         file_size = 0
         
-        # Stream file to disk in chunks (prevents memory overflow for large files)
+
         with open(temp_filename, "wb") as buffer:
             while chunk := await file.read(CHUNK_SIZE):
                 file_size += len(chunk)
                 
-                # Real-time size validation
                 if file_size > MAX_FILE_SIZE:
-                    # Clean up immediately
                     buffer.close()
                     os.remove(temp_filename)
                     raise HTTPException(
@@ -114,40 +93,28 @@ async def analyze_endpoint(file: UploadFile = File(...)):
                 
                 buffer.write(chunk)
         
-        # Check for empty files
         if file_size == 0:
             raise HTTPException(status_code=400, detail="File is empty")
         
         size_mb = file_size / (1024 * 1024)
         print(f"✅ Upload complete: {size_mb:.2f} MB")
         
-        # ========================================
-        # STEP 3: PERFORMANCE-OPTIMIZED ANALYSIS
-        # ========================================
+       
         
         print(f"🔍 Starting analysis...")
         start_time = datetime.now()
-        
-        # Run analysis in executor to prevent blocking
-        # This allows FastAPI to handle other requests while analyzing
         report = await asyncio.get_event_loop().run_in_executor(
-            None,  # Uses default thread pool
+            None, 
             analyze_apk,
             temp_filename
         )
         
         analysis_time = (datetime.now() - start_time).total_seconds()
         
-        # Check for analysis errors
         if "error" in report:
             print(f"❌ Analysis error: {report['error']}")
             raise HTTPException(status_code=500, detail=report["error"])
         
-        # ========================================
-        # STEP 4: RESULT ENRICHMENT
-        # ========================================
-        
-        # Add performance metrics
         report["scan_metadata"] = {
             "scan_time_seconds": round(analysis_time, 2),
             "file_size_mb": round(size_mb, 2),
@@ -155,7 +122,6 @@ async def analyze_endpoint(file: UploadFile = File(...)):
             "scan_timestamp": datetime.utcnow().isoformat()
         }
         
-        # Performance summary
         print(f"✅ Analysis complete!")
         print(f"   ⏱️  Time: {analysis_time:.2f}s")
         print(f"   📊 Speed: {size_mb/analysis_time:.2f} MB/s")
@@ -178,20 +144,12 @@ async def analyze_endpoint(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=error_msg)
     
     finally:
-        # ========================================
-        # STEP 5: CLEANUP (Always executed)
-        # ========================================
         if temp_filename and os.path.exists(temp_filename):
             try:
                 os.remove(temp_filename)
                 print(f"🗑️  Cleaned up: {os.path.basename(temp_filename)}")
             except Exception as e:
                 print(f"⚠️  Cleanup warning: {str(e)}")
-
-
-# ============================================================================
-# BACKGROUND TASKS (Optional - for production)
-# ============================================================================
 
 @app.on_event("startup")
 async def startup_event():
@@ -210,8 +168,6 @@ async def startup_event():
 async def shutdown_event():
     """Cleanup on shutdown"""
     print("\n🛑 Shutting down APK Security Analyzer")
-    
-    # Clean up any remaining temp files
     try:
         for filename in os.listdir(UPLOAD_DIR):
             file_path = os.path.join(UPLOAD_DIR, filename)
@@ -222,9 +178,6 @@ async def shutdown_event():
         print(f"⚠️  Cleanup warning: {e}")
 
 
-# ============================================================================
-# ERROR HANDLERS
-# ============================================================================
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
@@ -253,11 +206,6 @@ async def file_too_large_handler(request, exc):
         }
     )
 
-
-# ============================================================================
-# MAIN ENTRY POINT
-# ============================================================================
-
 if __name__ == "__main__":
     import uvicorn
     
@@ -275,8 +223,7 @@ if __name__ == "__main__":
         app, 
         host="0.0.0.0", 
         port=8000,
-        # Performance tuning
-        workers=1,  # Single worker for consistent analysis
-        limit_concurrency=10,  # Max 10 concurrent uploads
-        timeout_keep_alive=300,  # 5 min timeout for large files
+        workers=1,  
+        limit_concurrency=10,  
+        timeout_keep_alive=300,  
     )
