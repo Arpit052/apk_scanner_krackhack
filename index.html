@@ -182,6 +182,30 @@
             -webkit-text-fill-color: transparent;
         }
 
+        .nav-tabs {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-tab {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .nav-tab.active {
+            color: var(--accent-primary);
+            border-bottom-color: var(--accent-primary);
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+        }
+
         .screen-title {
             font-size: 2rem;
             font-weight: 700;
@@ -831,6 +855,12 @@
             <div class="logo-icon">🔒</div>
             <div class="logo-text">APK SECURITY SCANNER</div>
         </div>
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchMainTab('scanner')">Scanner</div>
+            <div class="nav-tab" onclick="switchMainTab('history')">History</div>
+            <div class="nav-tab" onclick="switchMainTab('documentation')">Documentation</div>
+            <div class="nav-tab" onclick="switchMainTab('settings')">Settings</div>
+        </div>
     </div>
 
     <div class="container">
@@ -842,7 +872,7 @@
             <div class="upload-zone" id="uploadZone">
                 <div class="upload-icon">📱</div>
                 <div class="upload-text">Drop APK file here or click to browse</div>
-                <div style="color: var(--text-muted); margin-top: 0.5rem;">Supports .apk files up to 100MB</div>
+                <div style="color: var(--text-muted); margin-top: 0.5rem;">Supports .apk files up to 300MB</div>
                 <input type="file" id="fileInput" accept=".apk" style="display: none;">
             </div>
 
@@ -1009,6 +1039,117 @@
                 </div>
                 <div class="nav-right">
                     <button class="btn btn-primary" onclick="resetScanner()">Scan New APK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Tab -->
+    <div id="historyTab" class="container" style="display: none;">
+        <div class="screen-title">Scan History</div>
+        <div class="screen-subtitle">View your previous APK security scans</div>
+        
+        <div style="background: var(--bg-secondary); padding: 3rem; border-radius: 12px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📋</div>
+            <div style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 1rem;">No scan history available yet</div>
+            <div style="color: var(--text-muted);">Your completed scans will appear here for easy reference</div>
+        </div>
+    </div>
+
+    <!-- Documentation Tab -->
+    <div id="documentationTab" class="container" style="display: none;">
+        <div class="screen-title">Documentation</div>
+        <div class="screen-subtitle">Learn how to use APK Security Scanner effectively</div>
+        
+        <div style="display: grid; gap: 1.5rem;">
+            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent-primary);">
+                <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">Getting Started</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    Upload your APK file using the Scanner tab. The tool supports APK files up to 300MB in size. 
+                    Once uploaded, click "Start Security Scan" to begin the comprehensive analysis.
+                </p>
+            </div>
+            
+            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent-warning);">
+                <h3 style="color: var(--accent-warning); margin-bottom: 1rem;">Understanding Results</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    Vulnerabilities are classified into four severity levels: Critical (immediate action required), 
+                    High (urgent fixes needed), Medium (should be addressed), and Low (recommended improvements). 
+                    Each vulnerability includes OWASP and CWE references for detailed understanding.
+                </p>
+                <p style="color: var(--text-secondary); line-height: 1.8; margin-top: 1rem;">
+                    Learn more: <a href="https://owasp.org/www-project-mobile-top-10/" target="_blank" style="color: var(--accent-primary); text-decoration: none; font-weight: 600;">OWASP Mobile Top 10</a>
+                </p>
+            </div>
+            
+            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent-success);">
+                <h3 style="color: var(--accent-success); margin-bottom: 1rem;">Exporting Reports</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    Export your scan results in multiple formats including JSON (for programmatic processing), 
+                    HTML (for viewing in browsers), CSV (for spreadsheet analysis), and PDF (for sharing with stakeholders).
+                </p>
+            </div>
+            
+            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent-secondary);">
+                <h3 style="color: var(--accent-secondary); margin-bottom: 1rem;">Best Practices</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    Regularly scan your APK files during development cycles. Address critical and high severity 
+                    vulnerabilities immediately. Use the detailed remediation steps provided for each finding. 
+                    Keep your development tools and libraries updated to minimize security risks.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="settingsTab" class="container" style="display: none;">
+        <div class="screen-title">Settings</div>
+        <div class="screen-subtitle">Configure your scanner preferences</div>
+        
+        <div style="display: grid; gap: 1.5rem;">
+            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px;">
+                <h3 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Scan Options</h3>
+                <div style="display: grid; gap: 1rem;">
+                    <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
+                        <input type="checkbox" checked style="width: 20px; height: 20px;">
+                        <span style="color: var(--text-secondary);">Enable deep code analysis</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
+                        <input type="checkbox" checked style="width: 20px; height: 20px;">
+                        <span style="color: var(--text-secondary);">Check for malicious permissions</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
+                        <input type="checkbox" checked style="width: 20px; height: 20px;">
+                        <span style="color: var(--text-secondary);">Analyze third-party libraries</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
+                        <input type="checkbox" style="width: 20px; height: 20px;">
+                        <span style="color: var(--text-secondary);">Generate detailed technical report</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px;">
+                <h3 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Display Settings</h3>
+                <div style="display: grid; gap: 1rem;">
+                    <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
+                        <input type="checkbox" id="highContrastToggle" style="width: 20px; height: 20px;" onchange="toggleHighContrast()">
+                        <span style="color: var(--text-secondary);">High contrast mode</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px;">
+                <h3 style="color: var(--accent-primary); margin-bottom: 1.5rem;">About</h3>
+                <div style="color: var(--text-secondary); line-height: 1.8;">
+                    <p style="margin-bottom: 0.5rem;"><strong>Version:</strong> 2.0.0</p>
+                    <p style="margin-bottom: 0.5rem;"><strong>Last Updated:</strong> February 2026</p>
+                    <p style="margin-bottom: 0.5rem;"><strong>Max File Size:</strong> 300MB</p>
+                    <p style="margin-bottom: 1rem;"><strong>Supported Formats:</strong> .apk</p>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">
+                        APK Security Scanner performs comprehensive security analysis including OWASP Mobile Top 10 
+                        vulnerabilities, CWE mappings, and custom security checks.
+                    </p>
                 </div>
             </div>
         </div>
@@ -1481,6 +1622,29 @@
             document.getElementById(`tab-${tab}`).classList.add('active');
         }
 
+        function switchMainTab(tab) {
+            // Update nav-tab buttons
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Hide all main sections
+            document.querySelector('.container').style.display = 'none';
+            document.getElementById('historyTab').style.display = 'none';
+            document.getElementById('documentationTab').style.display = 'none';
+            document.getElementById('settingsTab').style.display = 'none';
+
+            // Show selected section
+            if (tab === 'scanner') {
+                document.querySelector('.container').style.display = 'block';
+            } else if (tab === 'history') {
+                document.getElementById('historyTab').style.display = 'block';
+            } else if (tab === 'documentation') {
+                document.getElementById('documentationTab').style.display = 'block';
+            } else if (tab === 'settings') {
+                document.getElementById('settingsTab').style.display = 'block';
+            }
+        }
+
         // Navigation functions
         function goToUploadScreen() {
             document.getElementById('resultsScreen').classList.add('hidden');
@@ -1623,6 +1787,53 @@
                 notification.classList.remove('active');
             }, 3000);
         }
+
+        function toggleHighContrast() {
+            const isHighContrast = document.getElementById('highContrastToggle').checked;
+            const root = document.documentElement;
+            
+            if (isHighContrast) {
+                // High contrast mode - light theme
+                root.style.setProperty('--bg-primary', '#f5f5f5');
+                root.style.setProperty('--bg-secondary', '#ffffff');
+                root.style.setProperty('--bg-tertiary', '#e5e7eb');
+                root.style.setProperty('--accent-primary', '#0066cc');
+                root.style.setProperty('--accent-secondary', '#6d28d9');
+                root.style.setProperty('--accent-danger', '#dc2626');
+                root.style.setProperty('--accent-warning', '#d97706');
+                root.style.setProperty('--accent-success', '#059669');
+                root.style.setProperty('--text-primary', '#1f2937');
+                root.style.setProperty('--text-secondary', '#4b5563');
+                root.style.setProperty('--text-muted', '#6b7280');
+                root.style.setProperty('--border', '#d1d5db');
+            } else {
+                // Normal dark mode
+                root.style.setProperty('--bg-primary', '#0a0e17');
+                root.style.setProperty('--bg-secondary', '#131824');
+                root.style.setProperty('--bg-tertiary', '#1a2030');
+                root.style.setProperty('--accent-primary', '#00d9ff');
+                root.style.setProperty('--accent-secondary', '#7c3aed');
+                root.style.setProperty('--accent-danger', '#ef4444');
+                root.style.setProperty('--accent-warning', '#f59e0b');
+                root.style.setProperty('--accent-success', '#10b981');
+                root.style.setProperty('--text-primary', '#e5e7eb');
+                root.style.setProperty('--text-secondary', '#9ca3af');
+                root.style.setProperty('--text-muted', '#6b7280');
+                root.style.setProperty('--border', '#2d3748');
+            }
+            
+            // Save preference to localStorage
+            localStorage.setItem('highContrastMode', isHighContrast);
+        }
+
+        // Load saved preference on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedPreference = localStorage.getItem('highContrastMode');
+            if (savedPreference === 'true') {
+                document.getElementById('highContrastToggle').checked = true;
+                toggleHighContrast();
+            }
+        });
     </script>
 </body>
 </html>
