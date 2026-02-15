@@ -1074,119 +1074,110 @@
 
             // Animate progress steps
             const steps = ['step1', 'step2', 'step3', 'step4'];
-            for (let i = 0; i < steps.length; i++) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                document.getElementById(steps[i]).classList.add('completed');
-                if (i < steps.length - 1) {
-                    document.getElementById(steps[i + 1]).classList.add('active');
+            let stepIndex = 0;
+            
+            const stepInterval = setInterval(() => {
+                if (stepIndex < steps.length) {
+                    document.getElementById(steps[stepIndex]).classList.add('completed');
+                    if (stepIndex < steps.length - 1) {
+                        document.getElementById(steps[stepIndex + 1]).classList.add('active');
+                    }
+                    stepIndex++;
                 }
-            }
+            }, 800);
 
-            // Perform analysis
-            const results = await analyzeAPK(uploadedFile);
-            scanResults = results;
-            displayResults(results);
+            try {
+                // Perform real analysis by calling backend API
+                const results = await analyzeAPK(uploadedFile);
+                
+                clearInterval(stepInterval);
+                
+                // Mark all steps as complete
+                steps.forEach(step => {
+                    document.getElementById(step).classList.add('completed');
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                scanResults = results;
+                displayResults(results);
+            } catch (error) {
+                clearInterval(stepInterval);
+                document.getElementById('scanningScreen').classList.add('hidden');
+                document.getElementById('uploadScreen').classList.remove('hidden');
+                showNotification(`Scan failed: ${error.message}`, 'error');
+            }
         }
 
         async function analyzeAPK(file) {
-            const arrayBuffer = await file.arrayBuffer();
-            const uint8Array = new Uint8Array(arrayBuffer);
-            
-            let content = '';
-            for (let i = 0; i < Math.min(uint8Array.length, 100000); i++) {
-                content += String.fromCharCode(uint8Array[i]);
-            }
+            // THIS IS THE FIXED FUNCTION - CALLS THE REAL BACKEND
+            const formData = new FormData();
+            formData.append('file', file);
 
-            const vulnerabilities = [];
-
-            if (content.includes('debuggable')) {
-                vulnerabilities.push({
-                    id: 1,
-                    severity: 'medium',
-                    title: 'Potentially Debuggable Application',
-                    owasp: 'M7: Client Code Quality',
-                    cwe: 'CWE-489',
-                    location: 'AndroidManifest.xml',
-                    description: 'The APK may have debuggable flag enabled. This allows attackers to attach debuggers and inspect runtime behavior.',
-                    evidence: 'Pattern "debuggable" found in APK',
-                    impact: '• Runtime inspection possible\n• Memory dumps accessible\n• Debug mode exploitation',
-                    remediation: 'Set android:debuggable="false" in AndroidManifest.xml for production builds.'
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
                 });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `Server error: ${response.status}`);
+                }
+
+                const results = await response.json();
+                
+                // Transform the backend response to match the frontend format
+                const transformedResults = {
+                    metadata: {
+                        fileName: file.name,
+                        fileSize: file.size,
+                        scanDate: results.scanDate || new Date().toISOString(),
+                    },
+                    summary: {
+                        total_vulnerabilities: results.summary?.total || 0,
+                        critical: results.summary?.critical || 0,
+                        high: results.summary?.high || 0,
+                        medium: results.summary?.medium || 0,
+                        low: results.summary?.low || 0,
+                        info: results.summary?.info || 0
+                    },
+                    vulnerabilities: (results.vulnerabilities || []).map((v, index) => ({
+                        id: index + 1,
+                        severity: v.severity?.toLowerCase() || 'low',
+                        title: v.type || 'Unknown Vulnerability',
+                        owasp: v.owasp || 'N/A',
+                        cwe: v.cwe || 'N/A',
+                        location: v.location || v.category || 'Unknown',
+                        description: v.details || v.description || 'No description available',
+                        evidence: v.evidence || 'See description',
+                        impact: v.impact || 'Impact not specified',
+                        remediation: v.remediation || 'Remediation steps not specified'
+                    })),
+                    app_info: {
+                        app_name: results.app_name,
+                        package_name: results.package_name,
+                        version_name: results.version_name,
+                        version_code: results.version_code,
+                        min_sdk: results.min_sdk,
+                        target_sdk: results.target_sdk,
+                        file_hash_sha256: results.file_hash_sha256,
+                        file_size_mb: results.file_size_mb
+                    },
+                    malware_info: {
+                        detected: results.malware_detected || false,
+                        confidence: results.malware_confidence || 'None',
+                        indicators: results.malware_indicators || []
+                    },
+                    overall_risk_score: results.overall_risk_score || 0
+                };
+
+                return transformedResults;
+                
+            } catch (error) {
+                console.error('Analysis error:', error);
+                throw error;
             }
-
-            if (content.toLowerCase().includes('http://')) {
-                vulnerabilities.push({
-                    id: 2,
-                    severity: 'high',
-                    title: 'Cleartext HTTP Traffic Detected',
-                    owasp: 'M3: Insecure Communication',
-                    cwe: 'CWE-319',
-                    location: 'Network Configuration',
-                    description: 'HTTP URLs detected in the APK. Unencrypted communication can be intercepted.',
-                    evidence: 'HTTP URLs found in application',
-                    impact: '• Data transmitted in clear text\n• Man-in-the-middle attacks\n• Credential interception',
-                    remediation: 'Use HTTPS for all network communication and implement certificate pinning.'
-                });
-            }
-
-            if (content.includes('API') || content.includes('api_key') || content.includes('secret')) {
-                vulnerabilities.push({
-                    id: 3,
-                    severity: 'critical',
-                    title: 'Potential Hardcoded Secrets',
-                    owasp: 'M9: Reverse Engineering',
-                    cwe: 'CWE-798',
-                    location: 'Application Code',
-                    description: 'Patterns suggesting hardcoded API keys or secrets detected.',
-                    evidence: 'Keywords "API", "api_key", or "secret" found',
-                    impact: '• Secrets extractable via reverse engineering\n• Unauthorized API access\n• Account compromise',
-                    remediation: 'Remove hardcoded secrets. Use Android Keystore or fetch from secure backend.'
-                });
-            }
-
-            vulnerabilities.push({
-                id: 4,
-                severity: 'medium',
-                title: 'Certificate Pinning Recommended',
-                owasp: 'M3: Insecure Communication',
-                cwe: 'CWE-295',
-                location: 'Network Configuration',
-                description: 'Implement certificate pinning to prevent MITM attacks with rogue certificates.',
-                evidence: 'No certificate pinning implementation detected',
-                impact: '• Vulnerable to MITM with rogue CAs\n• Corporate proxies can intercept traffic',
-                remediation: 'Implement certificate pinning using Network Security Configuration or OkHttp CertificatePinner.'
-            });
-
-            vulnerabilities.push({
-                id: 5,
-                severity: 'low',
-                title: 'Code Obfuscation Check',
-                owasp: 'M9: Reverse Engineering',
-                cwe: 'CWE-656',
-                location: 'Build Configuration',
-                description: 'Ensure ProGuard/R8 obfuscation is enabled for production builds.',
-                evidence: 'General recommendation',
-                impact: '• Easier reverse engineering\n• Exposed business logic\n• Easier vulnerability discovery',
-                remediation: 'Enable minifyEnabled and use ProGuard/R8 rules in build.gradle.'
-            });
-
-            const summary = {
-                total_vulnerabilities: vulnerabilities.length,
-                critical: vulnerabilities.filter(v => v.severity === 'critical').length,
-                high: vulnerabilities.filter(v => v.severity === 'high').length,
-                medium: vulnerabilities.filter(v => v.severity === 'medium').length,
-                low: vulnerabilities.filter(v => v.severity === 'low').length,
-            };
-
-            return {
-                metadata: {
-                    fileName: file.name,
-                    fileSize: file.size,
-                    scanDate: new Date().toISOString(),
-                },
-                summary: summary,
-                vulnerabilities: vulnerabilities
-            };
         }
 
         function displayResults(results) {
@@ -1256,11 +1247,11 @@
                         </div>
                         <div class="detail-section">
                             <div class="detail-title">Impact</div>
-                            <div class="vulnerability-description">${vuln.impact.replace(/\n/g, '<br>')}</div>
+                            <div class="vulnerability-description">${(vuln.impact || '').replace(/\n/g, '<br>')}</div>
                         </div>
                         <div class="detail-section">
                             <div class="detail-title">Remediation</div>
-                            <div class="vulnerability-description">${vuln.remediation}</div>
+                            <div class="vulnerability-description">${(vuln.remediation || '').replace(/\n/g, '<br>')}</div>
                         </div>
                     </div>
                 </div>
