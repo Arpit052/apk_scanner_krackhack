@@ -126,6 +126,61 @@
             }
         }
 
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
         .animated {
             animation: fadeIn 0.6s ease-out;
         }
@@ -195,15 +250,24 @@
             transition: all 0.3s ease;
             font-weight: 500;
             cursor: pointer;
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
         }
+
+        .nav-tab:nth-child(1) { animation-delay: 0.1s; }
+        .nav-tab:nth-child(2) { animation-delay: 0.2s; }
+        .nav-tab:nth-child(3) { animation-delay: 0.3s; }
+        .nav-tab:nth-child(4) { animation-delay: 0.4s; }
 
         .nav-tab.active {
             color: var(--accent-primary);
             border-bottom-color: var(--accent-primary);
+            animation: pulse 2s ease-in-out infinite;
         }
 
         .nav-tab:hover {
             color: var(--text-primary);
+            transform: translateY(-3px);
         }
 
         .screen-title {
@@ -257,6 +321,8 @@
             border-color: var(--accent-primary);
             background: var(--bg-tertiary);
             animation: glow 1.5s ease-in-out infinite;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
         }
 
         .upload-icon {
@@ -400,8 +466,8 @@
         .summary-card:nth-child(4) { animation-delay: 0.4s; }
 
         .summary-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 217, 255, 0.3);
         }
 
         .summary-card.critical {
@@ -560,7 +626,10 @@
         }
 
         .vulnerability-card:hover {
-            transform: translateX(5px);
+            transform: translateX(10px) scale(1.02);
+            border-color: var(--accent-primary);
+            box-shadow: -5px 5px 30px rgba(0, 217, 255, 0.2);
+        }
             border-color: var(--accent-primary);
             box-shadow: -5px 0 15px rgba(0, 217, 255, 0.1);
         }
@@ -1317,8 +1386,8 @@
                         cwe: v.cwe || 'N/A',
                         location: v.location || v.category || 'Unknown',
                         description: v.details || v.description || 'No description available',
-                        evidence: v.evidence || 'See description',
-                        impact: v.impact || 'Impact not specified',
+                        evidence: v.evidence || '',
+                        impact: v.impact || '',
                         remediation: v.remediation || 'Remediation steps not specified'
                     })),
                     app_info: {
@@ -1339,12 +1408,48 @@
                     overall_risk_score: results.overall_risk_score || 0
                 };
 
+                // Group vulnerabilities by type to consolidate duplicates
+                transformedResults.vulnerabilities = groupVulnerabilitiesByType(transformedResults.vulnerabilities);
+
                 return transformedResults;
                 
             } catch (error) {
                 console.error('Analysis error:', error);
                 throw error;
             }
+        }
+
+        function groupVulnerabilitiesByType(vulnerabilities) {
+            const grouped = {};
+            
+            vulnerabilities.forEach(vuln => {
+                // Create a unique key based on vulnerability characteristics
+                const key = `${vuln.title}_${vuln.severity}_${vuln.owasp}_${vuln.cwe}`;
+                
+                if (!grouped[key]) {
+                    // First occurrence - create new entry with locations array
+                    grouped[key] = {
+                        ...vuln,
+                        locations: [vuln.location],
+                        evidences: vuln.evidence ? [vuln.evidence] : []
+                    };
+                } else {
+                    // Duplicate found - add location to existing entry
+                    if (!grouped[key].locations.includes(vuln.location)) {
+                        grouped[key].locations.push(vuln.location);
+                    }
+                    if (vuln.evidence && !grouped[key].evidences.includes(vuln.evidence)) {
+                        grouped[key].evidences.push(vuln.evidence);
+                    }
+                }
+            });
+            
+            // Convert back to array and update IDs
+            return Object.values(grouped).map((vuln, index) => ({
+                ...vuln,
+                id: index + 1,
+                location: vuln.locations.join(', ') // Keep backward compatibility
+            }));
         }
 
         function displayResults(results) {
@@ -1401,21 +1506,41 @@
                             <div class="vulnerability-meta">
                                 <span class="meta-tag">${vuln.owasp}</span>
                                 <span class="meta-tag">${vuln.cwe}</span>
-                                <span class="meta-tag">${vuln.location}</span>
+                                ${vuln.locations && vuln.locations.length > 1 ? 
+                                    `<span class="meta-tag" style="background: var(--accent-primary); color: var(--bg-primary);">${vuln.locations.length} locations</span>` :
+                                    `<span class="meta-tag">${vuln.location}</span>`
+                                }
                             </div>
                         </div>
                         <div class="severity-badge ${vuln.severity}">${vuln.severity}</div>
                     </div>
                     <div class="vulnerability-description">${vuln.description}</div>
                     <div class="vulnerability-details">
+                        ${vuln.locations && vuln.locations.length > 0 ? `
+                        <div class="detail-section">
+                            <div class="detail-title">Found in ${vuln.locations.length} Location${vuln.locations.length > 1 ? 's' : ''}</div>
+                            <ul style="margin: 0.5rem 0; padding-left: 1.5rem; color: var(--text-secondary);">
+                                ${vuln.locations.map(loc => `<li style="margin: 0.25rem 0;">${loc}</li>`).join('')}
+                            </ul>
+                        </div>
+                        ` : ''}
+                        ${vuln.evidences && vuln.evidences.length > 0 ? `
+                        <div class="detail-section">
+                            <div class="detail-title">Evidence${vuln.evidences.length > 1 ? 's' : ''}</div>
+                            ${vuln.evidences.map((ev, i) => `<div class="code-block" style="margin-bottom: 0.5rem;">${ev}</div>`).join('')}
+                        </div>
+                        ` : vuln.evidence ? `
                         <div class="detail-section">
                             <div class="detail-title">Evidence</div>
                             <div class="code-block">${vuln.evidence}</div>
                         </div>
+                        ` : ''}
+                        ${vuln.impact ? `
                         <div class="detail-section">
                             <div class="detail-title">Impact</div>
                             <div class="vulnerability-description">${(vuln.impact || '').replace(/\n/g, '<br>')}</div>
                         </div>
+                        ` : ''}
                         <div class="detail-section">
                             <div class="detail-title">Remediation</div>
                             <div class="vulnerability-description">${(vuln.remediation || '').replace(/\n/g, '<br>')}</div>
@@ -1774,6 +1899,7 @@
         .vuln { margin: 20px 0; padding: 20px; border-left: 4px solid #ccc; background: #f9f9f9; }
         .evidence { background: #f0f0f0; padding: 10px; border-radius: 4px; font-family: monospace; margin: 10px 0; white-space: pre-wrap; }
         .section-title { font-weight: bold; margin-top: 15px; color: #555; }
+        .code-example { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 4px; font-family: monospace; margin: 10px 0; white-space: pre-wrap; overflow-x: auto; }
     </style>
 </head>
 <body>
@@ -1791,12 +1917,22 @@
         ${results.vulnerabilities.map(v => `
             <div class="vuln">
                 <h3>${v.title} <span style="color: #999;">[${v.severity.toUpperCase()}]</span></h3>
-                <p><strong>OWASP:</strong> ${v.owasp} | <strong>CWE:</strong> ${v.cwe} | <strong>Location:</strong> ${v.location}</p>
+                <p><strong>OWASP:</strong> ${v.owasp} | <strong>CWE:</strong> ${v.cwe}</p>
+                
+                ${v.locations && v.locations.length > 0 ? `
+                <p><strong>Found in ${v.locations.length} Location${v.locations.length > 1 ? 's' : ''}:</strong></p>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    ${v.locations.map(loc => `<li>${loc}</li>`).join('')}
+                </ul>
+                ` : `<p><strong>Location:</strong> ${v.location}</p>`}
                 
                 <div class="section-title">Description:</div>
                 <p>${v.description}</p>
                 
-                ${v.evidence ? `
+                ${v.evidences && v.evidences.length > 0 ? `
+                <div class="section-title">Evidence${v.evidences.length > 1 ? 's' : ''}:</div>
+                ${v.evidences.map(ev => `<div class="evidence">${ev}</div>`).join('')}
+                ` : v.evidence ? `
                 <div class="section-title">Evidence:</div>
                 <div class="evidence">${v.evidence}</div>
                 ` : ''}
@@ -1807,12 +1943,20 @@
                 ` : ''}
                 
                 <div class="section-title">Remediation:</div>
-                <p>${v.remediation}</p>
+                <p>${formatRemediationText(v.remediation)}</p>
             </div>
         `).join('')}
     </div>
 </body>
 </html>`;
+        }
+
+        function formatRemediationText(text) {
+            if (!text) return 'Remediation steps not specified';
+            // Wrap code blocks in proper formatting (detect code patterns)
+            return text.replace(/```([\s\S]*?)```/g, '<div class="code-example">$1</div>')
+                       .replace(/`([^`]+)`/g, '<code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: monospace;">$1</code>')
+                       .replace(/\n/g, '<br>');
         }
 
         function cancelScan() {
