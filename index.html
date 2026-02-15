@@ -1051,7 +1051,7 @@
     <!-- History Tab -->
     <div id="historyTab" class="container" style="display: none;">
         <div class="screen-title">Scan History</div>
-        <div class="screen-subtitle">View your previous APK security scans (Last 2 scans)</div>
+        <div class="screen-subtitle">View your previous APK security scans (Last 10 scans)</div>
         
         <div id="historyContainer"></div>
     </div>
@@ -1716,7 +1716,9 @@
                     extension = 'html';
                     break;
                 case 'pdf':
-                    showNotification('PDF export will be available in the full version', 'success');
+                    // Use browser print to save as PDF
+                    window.print();
+                    showNotification('Use your browser\'s print dialog to save as PDF', 'success');
                     return;
             }
 
@@ -1798,26 +1800,37 @@
         }
 
         function saveScanToHistory(results) {
+            console.log('Saving scan to history:', results);
             let history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
             
             // Add new scan to beginning
-            history.unshift({
+            const historyEntry = {
                 fileName: results.metadata.fileName,
                 scanDate: results.metadata.scanDate,
                 summary: results.summary,
                 totalVulnerabilities: results.summary.total_vulnerabilities,
                 timestamp: Date.now()
-            });
+            };
             
-            // Keep only last 2 scans
-            history = history.slice(0, 2);
+            console.log('History entry:', historyEntry);
+            history.unshift(historyEntry);
+            
+            // Keep only last 10 scans
+            history = history.slice(0, 10);
             
             localStorage.setItem('scanHistory', JSON.stringify(history));
+            console.log('History saved to localStorage:', history);
         }
 
         function loadScanHistory() {
             const history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+            console.log('Loading scan history:', history);
             const historyContainer = document.getElementById('historyContainer');
+            
+            if (!historyContainer) {
+                console.error('History container not found!');
+                return;
+            }
             
             if (history.length === 0) {
                 historyContainer.innerHTML = `
