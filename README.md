@@ -54,3 +54,24 @@ If you wish to run the analysis engine locally:
 ```bash
 git clone https://github.com/yourusername/apk-scanner.git
 cd apk-scanner
+```
+
+### Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Start the server
+
+```bash
+python main.py
+```
+
+### Server URL
+
+```
+http://localhost:8000
+```
+
+
