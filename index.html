@@ -921,6 +921,10 @@
                     </div>
                 </div>
             </div>
+
+            <button class="btn btn-secondary" onclick="cancelScan()" style="margin-top: 2rem;">
+                Cancel Scan
+            </button>
         </div>
 
         <!-- Screen 3: Results Summary Screen -->
@@ -1047,13 +1051,9 @@
     <!-- History Tab -->
     <div id="historyTab" class="container" style="display: none;">
         <div class="screen-title">Scan History</div>
-        <div class="screen-subtitle">View your previous APK security scans</div>
+        <div class="screen-subtitle">View your previous APK security scans (Last 2 scans)</div>
         
-        <div style="background: var(--bg-secondary); padding: 3rem; border-radius: 12px; text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📋</div>
-            <div style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 1rem;">No scan history available yet</div>
-            <div style="color: var(--text-muted);">Your completed scans will appear here for easy reference</div>
-        </div>
+        <div id="historyContainer"></div>
     </div>
 
     <!-- Documentation Tab -->
@@ -1164,6 +1164,8 @@
         let uploadedFile = null;
         let scanResults = null;
         let charts = {};
+        let currentScanInterval = null;
+        let currentAbortController = null;
 
         // Initialize
         document.getElementById('uploadZone').addEventListener('click', () => {
@@ -1213,11 +1215,17 @@
             document.getElementById('uploadScreen').classList.add('hidden');
             document.getElementById('scanningScreen').classList.remove('hidden');
 
-            // Animate progress steps
+            // Reset all steps
             const steps = ['step1', 'step2', 'step3', 'step4'];
+            steps.forEach(step => {
+                document.getElementById(step).classList.remove('completed', 'active');
+            });
+            document.getElementById('step1').classList.add('active');
+
+            // Animate progress steps
             let stepIndex = 0;
             
-            const stepInterval = setInterval(() => {
+            currentScanInterval = setInterval(() => {
                 if (stepIndex < steps.length) {
                     document.getElementById(steps[stepIndex]).classList.add('completed');
                     if (stepIndex < steps.length - 1) {
@@ -1228,10 +1236,14 @@
             }, 800);
 
             try {
+                // Create abort controller for cancellation
+                currentAbortController = new AbortController();
+                
                 // Perform real analysis by calling backend API
                 const results = await analyzeAPK(uploadedFile);
                 
-                clearInterval(stepInterval);
+                clearInterval(currentScanInterval);
+                currentScanInterval = null;
                 
                 // Mark all steps as complete
                 steps.forEach(step => {
@@ -1241,12 +1253,25 @@
                 await new Promise(resolve => setTimeout(resolve, 500));
                 
                 scanResults = results;
+                
+                // Save to history
+                saveScanToHistory(results);
+                
                 displayResults(results);
             } catch (error) {
-                clearInterval(stepInterval);
-                document.getElementById('scanningScreen').classList.add('hidden');
-                document.getElementById('uploadScreen').classList.remove('hidden');
-                showNotification(`Scan failed: ${error.message}`, 'error');
+                clearInterval(currentScanInterval);
+                currentScanInterval = null;
+                
+                if (error.name === 'AbortError') {
+                    // Scan was cancelled
+                    document.getElementById('scanningScreen').classList.add('hidden');
+                    document.getElementById('uploadScreen').classList.remove('hidden');
+                    showNotification('Scan cancelled', 'error');
+                } else {
+                    document.getElementById('scanningScreen').classList.add('hidden');
+                    document.getElementById('uploadScreen').classList.remove('hidden');
+                    showNotification(`Scan failed: ${error.message}`, 'error');
+                }
             }
         }
 
@@ -1258,7 +1283,8 @@
             try {
                 const response = await fetch('/analyze', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    signal: currentAbortController.signal
                 });
 
                 if (!response.ok) {
@@ -1638,6 +1664,7 @@
                 document.querySelector('.container').style.display = 'block';
             } else if (tab === 'history') {
                 document.getElementById('historyTab').style.display = 'block';
+                loadScanHistory();
             } else if (tab === 'documentation') {
                 document.getElementById('documentationTab').style.display = 'block';
             } else if (tab === 'settings') {
@@ -1757,6 +1784,81 @@
     </div>
 </body>
 </html>`;
+        }
+
+        function cancelScan() {
+            if (currentAbortController) {
+                currentAbortController.abort();
+                currentAbortController = null;
+            }
+            if (currentScanInterval) {
+                clearInterval(currentScanInterval);
+                currentScanInterval = null;
+            }
+        }
+
+        function saveScanToHistory(results) {
+            let history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+            
+            // Add new scan to beginning
+            history.unshift({
+                fileName: results.metadata.fileName,
+                scanDate: results.metadata.scanDate,
+                summary: results.summary,
+                totalVulnerabilities: results.summary.total_vulnerabilities,
+                timestamp: Date.now()
+            });
+            
+            // Keep only last 2 scans
+            history = history.slice(0, 2);
+            
+            localStorage.setItem('scanHistory', JSON.stringify(history));
+        }
+
+        function loadScanHistory() {
+            const history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+            const historyContainer = document.getElementById('historyContainer');
+            
+            if (history.length === 0) {
+                historyContainer.innerHTML = `
+                    <div style="background: var(--bg-secondary); padding: 3rem; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📋</div>
+                        <div style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 1rem;">No scan history available yet</div>
+                        <div style="color: var(--text-muted);">Your completed scans will appear here for easy reference</div>
+                    </div>
+                `;
+            } else {
+                historyContainer.innerHTML = history.map((scan, index) => `
+                    <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent-primary); margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <h3 style="color: var(--accent-primary); margin-bottom: 0.5rem; font-size: 1.2rem;">${scan.fileName}</h3>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                    ${new Date(scan.scanDate).toLocaleString()}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1rem;">
+                            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-danger);">${scan.summary.critical}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Critical</div>
+                            </div>
+                            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-warning);">${scan.summary.high}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">High</div>
+                            </div>
+                            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-primary);">${scan.summary.medium}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Medium</div>
+                            </div>
+                            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-success);">${scan.summary.low}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Low</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
         }
 
         function resetScanner() {
