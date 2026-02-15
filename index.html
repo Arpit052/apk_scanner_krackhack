@@ -1716,9 +1716,20 @@
                     extension = 'html';
                     break;
                 case 'pdf':
-                    // Use browser print to save as PDF
-                    window.print();
-                    showNotification('Use your browser\'s print dialog to save as PDF', 'success');
+                    // Generate HTML content for PDF
+                    const pdfHTML = convertToHTML(scanResults);
+                    
+                    // Open in new window and trigger print
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(pdfHTML);
+                    printWindow.document.close();
+                    
+                    // Wait for content to load, then trigger print
+                    printWindow.onload = function() {
+                        printWindow.print();
+                    };
+                    
+                    showNotification('Print dialog opened - Save as PDF to download', 'success');
                     return;
             }
 
@@ -1761,6 +1772,8 @@
         .medium { background: #e3f2fd; border: 2px solid #2196f3; }
         .low { background: #e8f5e9; border: 2px solid #4caf50; }
         .vuln { margin: 20px 0; padding: 20px; border-left: 4px solid #ccc; background: #f9f9f9; }
+        .evidence { background: #f0f0f0; padding: 10px; border-radius: 4px; font-family: monospace; margin: 10px 0; white-space: pre-wrap; }
+        .section-title { font-weight: bold; margin-top: 15px; color: #555; }
     </style>
 </head>
 <body>
@@ -1778,9 +1791,23 @@
         ${results.vulnerabilities.map(v => `
             <div class="vuln">
                 <h3>${v.title} <span style="color: #999;">[${v.severity.toUpperCase()}]</span></h3>
-                <p><strong>OWASP:</strong> ${v.owasp} | <strong>CWE:</strong> ${v.cwe}</p>
+                <p><strong>OWASP:</strong> ${v.owasp} | <strong>CWE:</strong> ${v.cwe} | <strong>Location:</strong> ${v.location}</p>
+                
+                <div class="section-title">Description:</div>
                 <p>${v.description}</p>
-                <p><strong>Remediation:</strong> ${v.remediation}</p>
+                
+                ${v.evidence ? `
+                <div class="section-title">Evidence:</div>
+                <div class="evidence">${v.evidence}</div>
+                ` : ''}
+                
+                ${v.impact ? `
+                <div class="section-title">Impact:</div>
+                <p>${v.impact}</p>
+                ` : ''}
+                
+                <div class="section-title">Remediation:</div>
+                <p>${v.remediation}</p>
             </div>
         `).join('')}
     </div>
