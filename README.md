@@ -52,3 +52,17 @@ If you wish to run the analysis engine locally:
 ```bash
 git clone https://github.com/yourusername/apk-scanner.git
 cd apk-scanner
+
+## 💻 Run Locally
+```bash
+pip install -r requirements.txt
+python main.py
+
+
+## The server will start with Uvicorn on:
+http://localhost:8000
+
+
+
+
+
