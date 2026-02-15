@@ -4,3 +4,9 @@ python-multipart==0.0.9
 pyaxmlparser==0.3.31
 aiofiles==24.1.0
 orjson==3.10.7
+aiocache==0.12.2
+cachetools==5.3.3
+lxml==5.1.0
+regex==2023.12.25
+diskcache==5.6.3
+psutil==5.9.8
