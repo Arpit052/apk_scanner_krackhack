@@ -14,32 +14,34 @@ https://apkscannerkrackhack-production.up.railway.app
   Utilizes a 12-worker parallel processing engine to analyze large APKs (up to 300MB).
 
 - 🕵️ **Deep Static Analysis**  
-  Detects critical flaws like Intent Redirection, Exported Accessibility Services, and Insecure WebViews.
+  Detects Intent Redirection, Exported Accessibility Services, and Insecure WebViews.
 
 - 🔑 **Secrets Scanning**  
-  Rapid regex-based detection for hardcoded AWS keys, Firebase URLs, Stripe tokens, and Private Keys.
+  Regex-based detection for AWS keys, Firebase URLs, Stripe tokens, and Private Keys.
 
 - 🦠 **Malware Detection**  
   Identifies malicious permission combinations, hooking frameworks, and known malicious packages.
 
 - 📊 **Interactive Dashboard**  
-  A beautiful, responsive frontend featuring Chart.js visualizations, OWASP/CWE breakdowns, and actionable remediation steps.
+  Responsive frontend with Chart.js visualizations, OWASP/CWE breakdowns, and remediation steps.
 
 - 🔌 **API-First Design**  
-  Built on FastAPI, making it easy to integrate with CI/CD pipelines.
+  Built on FastAPI for easy CI/CD integration.
 
 ---
 
-## 🌐 Live Usage (Recommended for Evaluation)
+## 🌐 Live Usage (Recommended)
 
-- Access the fully functional deployed scanner directly from your browser (no local installation required):  
+- Open the live server:  
   https://apkscannerkrackhack-production.up.railway.app
 
-- Upload any `.apk` file (e.g., a vulnerable app like InsecureShop.apk).
+- Upload any `.apk` file (e.g., InsecureShop.apk)
 
-- Click **Start Security Scan** to initiate the analysis engine.
+- Click **Start Security Scan**
 
-- View the generated vulnerability dashboard and export the detailed report in JSON/PDF formats.
+- View vulnerability dashboard
+
+- Export detailed JSON/PDF reports
 
 ---
 
@@ -52,10 +54,3 @@ If you wish to run the analysis engine locally:
 ```bash
 git clone https://github.com/yourusername/apk-scanner.git
 cd apk-scanner
-
-
-
-
-
-
-
