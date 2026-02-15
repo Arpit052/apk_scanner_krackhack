@@ -1,4 +1,4 @@
--#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 HYBRID ULTIMATE APK Security Analyzer
 Maximum Speed + Maximum Accuracy + Zero Malware Escape
