@@ -1411,6 +1411,25 @@
                 // Group vulnerabilities by type to consolidate duplicates
                 transformedResults.vulnerabilities = groupVulnerabilitiesByType(transformedResults.vulnerabilities);
 
+                // Recalculate summary counts after grouping
+                const groupedSummary = {
+                    critical: 0,
+                    high: 0,
+                    medium: 0,
+                    low: 0,
+                    info: 0
+                };
+                
+                transformedResults.vulnerabilities.forEach(v => {
+                    const severity = v.severity.toLowerCase();
+                    if (groupedSummary.hasOwnProperty(severity)) {
+                        groupedSummary[severity]++;
+                    }
+                });
+                
+                groupedSummary.total_vulnerabilities = transformedResults.vulnerabilities.length;
+                transformedResults.summary = groupedSummary;
+
                 return transformedResults;
                 
             } catch (error) {
