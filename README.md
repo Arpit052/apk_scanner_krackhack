@@ -30,7 +30,7 @@ https://apkscannerkrackhack-production.up.railway.app
 
 ---
 
-## 🌐 Live Usage (Recommended)
+## 🌐 Live Usage (Steps)
 
 - Open the live server:  
   https://apkscannerkrackhack-production.up.railway.app
