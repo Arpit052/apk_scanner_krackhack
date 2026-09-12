@@ -1,11 +1,12 @@
 #  Hybrid Ultimate APK Security Scanner
-
+Hi all, So me and my team made this vulnerabilities scanner in an APK based on official OWASP documentation, the idea implementation here was a key part and we tried to maximise its accuracy and speed as much as can.
 A high-performance, web-based static analysis tool for Android applications.  
 Designed to rapidly detect OWASP Mobile Top 10 vulnerabilities, hardcoded secrets, and malware signatures in APK files up to 300MB.
 
  **Live Demo:**  
 https://apkscannerkrackhack-production.up.railway.app
-
+                      or 
+https://apk-scanner-krackhack.onrender.com
 ---
 
 ##  Features
