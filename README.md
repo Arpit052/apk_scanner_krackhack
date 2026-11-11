@@ -127,4 +127,4 @@ This is static analysis. It can't see code that is downloaded or unpacked at run
 
 ## License
 
-MIT for the code. Fonts in `static/fonts` are licensed under the SIL Open Font License.
+MIT for the code. Geist fonts in `static/fonts` are licensed under the SIL Open Font License.

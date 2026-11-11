@@ -5,247 +5,284 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>APK X-Ray · KrackHack Scanner</title>
 <meta name="description" content="Static security and malware analysis for Android apps, mapped to the OWASP Mobile Top 10 (2024) and MASVS.">
-<link rel="preload" href="/static/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/static/fonts/figtree-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%237CF7FF' stroke-width='6' stroke-dasharray='30 11'/%3E%3Ccircle cx='32' cy='32' r='9' fill='%23FF3D7F'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#07090D">
+<link rel="preload" href="/static/fonts/geist-sans-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/static/fonts/geist-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307090D'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%2367E8F9' stroke-width='4' stroke-dasharray='22 8'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23F43F5E'/%3E%3C/svg%3E">
 <style>
-@font-face{font-family:'Big Shoulders Display';font-weight:700;font-style:normal;font-display:swap;src:url(/static/fonts/big-shoulders-display-latin-700-normal.woff2) format('woff2')}
-@font-face{font-family:'Big Shoulders Display';font-weight:800;font-style:normal;font-display:swap;src:url(/static/fonts/big-shoulders-display-latin-800-normal.woff2) format('woff2')}
-@font-face{font-family:'Big Shoulders Display';font-weight:900;font-style:normal;font-display:swap;src:url(/static/fonts/big-shoulders-display-latin-900-normal.woff2) format('woff2')}
-@font-face{font-family:'Figtree';font-weight:400;font-style:normal;font-display:swap;src:url(/static/fonts/figtree-latin-400-normal.woff2) format('woff2')}
-@font-face{font-family:'Figtree';font-weight:500;font-style:normal;font-display:swap;src:url(/static/fonts/figtree-latin-500-normal.woff2) format('woff2')}
-@font-face{font-family:'Figtree';font-weight:600;font-style:normal;font-display:swap;src:url(/static/fonts/figtree-latin-600-normal.woff2) format('woff2')}
-@font-face{font-family:'Figtree';font-weight:700;font-style:normal;font-display:swap;src:url(/static/fonts/figtree-latin-700-normal.woff2) format('woff2')}
-@font-face{font-family:'JetBrains Mono';font-weight:400;font-style:normal;font-display:swap;src:url(/static/fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2')}
-@font-face{font-family:'JetBrains Mono';font-weight:600;font-style:normal;font-display:swap;src:url(/static/fonts/jetbrains-mono-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Geist';font-weight:400;font-display:swap;src:url(/static/fonts/geist-sans-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Geist';font-weight:500;font-display:swap;src:url(/static/fonts/geist-sans-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Geist';font-weight:600;font-display:swap;src:url(/static/fonts/geist-sans-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Geist';font-weight:700;font-display:swap;src:url(/static/fonts/geist-sans-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Geist Mono';font-weight:400;font-display:swap;src:url(/static/fonts/geist-mono-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Geist Mono';font-weight:500;font-display:swap;src:url(/static/fonts/geist-mono-latin-500-normal.woff2) format('woff2')}
 :root{
-  --bg:#071330; --bg2:#0A1A42; --panel:#0D2152; --panel2:#11295F;
-  --line:rgba(124,247,255,.16); --line2:rgba(124,247,255,.32);
-  --xray:#7CF7FF; --xray-dim:#3FB7C9; --bone:#E6EEFF; --muted:#93A7D6; --faint:#5C70A3;
-  --crit:#FF3D7F; --high:#FF8A3D; --med:#FFC94A; --low:#6FA8FF; --info:#8A9BC4; --ok:#4BE3A0;
-  --display:'Big Shoulders Display', 'Arial Narrow', sans-serif;
-  --body:'Figtree', system-ui, sans-serif;
-  --mono:'JetBrains Mono', ui-monospace, monospace;
-  --cut:14px;
+  --bg:#07090D; --bg2:#0A0D13; --panel:#0E1219; --panel2:#131823; --hover:#171D29;
+  --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.12); --line3:rgba(255,255,255,.2);
+  --text:#E8ECF2; --muted:#8B95A7; --faint:#5B6577;
+  --accent:#67E8F9; --accent-soft:rgba(103,232,249,.12);
+  --crit:#F43F5E; --high:#FB923C; --med:#FBBF24; --low:#60A5FA; --info:#64748B; --ok:#34D399;
+  --sans:'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono:'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --r:14px; --r-sm:10px;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--bone);font:16px/1.55 var(--body);min-height:100vh;overflow-x:hidden;
-  background-image:
-    radial-gradient(1200px 700px at 78% -10%, rgba(63,183,201,.18), transparent 60%),
-    radial-gradient(900px 600px at -10% 110%, rgba(255,61,127,.10), transparent 60%),
-    linear-gradient(rgba(124,247,255,.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124,247,255,.045) 1px, transparent 1px);
-  background-size:auto,auto,32px 32px,32px 32px;}
-a{color:var(--xray)}
+body{background:var(--bg);color:var(--text);font:15px/1.6 var(--sans);min-height:100vh;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(900px 520px at 85% -8%, rgba(103,232,249,.07), transparent 65%),
+             radial-gradient(700px 500px at -5% 105%, rgba(244,63,94,.045), transparent 60%)}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
 button{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--xray);outline-offset:3px;border-radius:4px}
-.wrap{max-width:1320px;margin:0 auto;padding:0 28px}
+code,pre{font-family:var(--mono)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 28px;position:relative;z-index:1}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
-/* ---------- top bar ---------- */
-header.top{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
-.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--bone)}
-.brand svg{width:34px;height:34px}
-.brand b{font:800 26px/1 var(--display);letter-spacing:.01em}
-.brand span{color:var(--muted);font-size:14px}
-.top nav{display:flex;gap:6px;align-items:center}
-.ghost{background:none;border:1px solid var(--line2);border-radius:999px;padding:8px 16px;cursor:pointer;text-decoration:none;color:var(--bone);font-size:14px}
-.ghost:hover{border-color:var(--xray);color:var(--xray)}
+/* top bar */
+header.top{display:flex;align-items:center;justify-content:space-between;height:68px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text)}
+.brand:hover{text-decoration:none}
+.brand svg{width:28px;height:28px}
+.brand b{font-weight:600;font-size:16px;letter-spacing:-.01em}
+.brand span{color:var(--faint);font-size:13px;padding-left:10px;margin-left:2px;border-left:1px solid var(--line2)}
+.top nav{display:flex;gap:4px}
+.navlink{color:var(--muted);font-size:14px;padding:7px 12px;border-radius:8px}
+.navlink:hover{color:var(--text);background:var(--panel);text-decoration:none}
 
-/* ---------- landing ---------- */
-#view-landing{position:relative}
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;height:42px;padding:0 18px;border-radius:var(--r-sm);
+  font-weight:600;font-size:14px;background:var(--text);color:#07090D;transition:background .15s, opacity .15s}
+.btn:hover{background:#fff}
+.btn[disabled]{opacity:.35;cursor:not-allowed}
+.btn-2{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:var(--r-sm);cursor:pointer;
+  background:var(--panel);border:1px solid var(--line2);color:var(--text);font-size:13.5px;font-weight:500;transition:border-color .15s, background .15s}
+.btn-2:hover{background:var(--panel2);border-color:var(--line3)}
+.btn-2 svg,.btn svg{width:16px;height:16px}
+.link{background:none;border:none;color:var(--muted);cursor:pointer;padding:6px 2px;font-weight:500;font-size:14px}
+.link:hover{color:var(--text)}
+.link.accent{color:var(--accent)}
+
+/* lens (landing background) */
 .lens{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
-  font:12px/1.6 var(--mono);color:rgba(124,247,255,.75);white-space:pre-wrap;word-break:break-all;
-  -webkit-mask-image:radial-gradient(260px 260px at var(--mx,50%) var(--my,40%), #000 0, rgba(0,0,0,.35) 45%, transparent 72%);
-          mask-image:radial-gradient(260px 260px at var(--mx,50%) var(--my,40%), #000 0, rgba(0,0,0,.35) 45%, transparent 72%);
-  opacity:.0;transition:opacity .4s}
-body.has-pointer .lens{opacity:.55}
-.hero{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:48px;align-items:center;padding:36px 0 60px}
-.hero h1{font:900 clamp(64px,9vw,132px)/.86 var(--display);letter-spacing:-.01em;margin:0 0 22px;text-wrap:balance}
-.hero h1 .ghosted{display:block;color:transparent;-webkit-text-stroke:1.5px var(--xray);text-shadow:0 0 30px rgba(124,247,255,.25)}
-.hero p.lede{font-size:19px;color:var(--muted);max-width:34em;margin:0 0 30px}
-.drop{position:relative;border:1.5px dashed var(--line2);background:rgba(13,33,82,.55);backdrop-filter:blur(6px);
-  clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));
-  padding:26px 26px 24px;display:flex;gap:20px;align-items:center;cursor:pointer;transition:border-color .2s, background .2s}
-.drop:hover,.drop.over{border-color:var(--xray);background:rgba(17,41,95,.75)}
-.drop.over{box-shadow:inset 0 0 60px rgba(124,247,255,.18)}
-.drop .glyph{flex:0 0 64px;height:64px;border:1.5px solid var(--xray);display:grid;place-items:center;
-  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
-.drop strong{display:block;font:700 22px/1.2 var(--body)}
-.drop small{color:var(--muted);font-size:14px}
-.cta-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:18px;align-items:center}
-.btn{border:none;cursor:pointer;padding:14px 22px;font-weight:700;font-size:15px;background:var(--xray);color:#04122E;
-  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
-.btn:hover{background:#B4FBFF}
-.btn[disabled]{opacity:.4;cursor:not-allowed}
-.link{background:none;border:none;color:var(--xray);cursor:pointer;padding:6px 0;font-weight:600;text-decoration:underline;text-underline-offset:4px}
-.picked{font-size:14px;color:var(--muted)}
-.checks{position:relative;z-index:1;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:1px solid var(--line);margin-bottom:56px}
-.checks div{padding:18px 18px 18px 0;border-right:1px solid var(--line)}
-.checks div:last-child{border-right:none}
-.checks b{display:block;font:800 30px/1 var(--display);color:var(--xray)}
-.checks span{color:var(--muted);font-size:14px}
-.history{position:relative;z-index:1;margin-bottom:60px}
-.history h2{font:800 30px/1 var(--display);margin:0 0 14px}
-.hist-list{display:flex;flex-wrap:wrap;gap:10px}
-.hist{display:flex;gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--line);background:rgba(13,33,82,.5);cursor:pointer;border-radius:6px}
-.hist:hover{border-color:var(--xray)}
-.hist .g{font:900 28px/1 var(--display);width:28px;text-align:center}
-.hist small{display:block;color:var(--muted);font-size:12px}
+  font:11.5px/1.7 var(--mono);color:rgba(103,232,249,.55);white-space:pre-wrap;word-break:break-all;
+  -webkit-mask-image:radial-gradient(240px 240px at var(--mx,50%) var(--my,40%), #000 0, rgba(0,0,0,.25) 50%, transparent 75%);
+          mask-image:radial-gradient(240px 240px at var(--mx,50%) var(--my,40%), #000 0, rgba(0,0,0,.25) 50%, transparent 75%);
+  opacity:0;transition:opacity .5s}
+body.has-pointer .lens{opacity:.4}
 
-/* ---------- the ring ---------- */
-.ring-box{position:relative;aspect-ratio:1;width:100%;max-width:560px;justify-self:center}
+/* landing */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:56px;align-items:center;padding:72px 0 64px}
+.badge{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);border:1px solid var(--line2);background:var(--bg2);
+  padding:5px 12px 5px 8px;border-radius:999px;margin-bottom:22px}
+.badge i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(52,211,153,.15)}
+.hero h1{font-weight:600;font-size:clamp(42px,5.4vw,68px);line-height:1.02;letter-spacing:-.045em;margin:0 0 20px;text-wrap:balance}
+.hero p.lede{font-size:17px;color:var(--muted);max-width:33em;margin:0 0 34px;line-height:1.65}
+.drop{display:flex;gap:18px;align-items:center;padding:22px;border-radius:var(--r);cursor:pointer;
+  border:1px dashed var(--line3);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.01));transition:border-color .2s, background .2s}
+.drop:hover{border-color:rgba(103,232,249,.45)}
+.drop.over{border-color:var(--accent);border-style:solid;background:var(--accent-soft)}
+.drop .glyph{flex:0 0 48px;height:48px;border-radius:12px;display:grid;place-items:center;background:var(--panel2);border:1px solid var(--line2)}
+.drop .glyph svg{width:22px;height:22px}
+.drop strong{display:block;font-weight:600;font-size:15.5px}
+.drop small{color:var(--faint);font-size:13.5px}
+.drop.ready{border-style:solid;border-color:rgba(52,211,153,.45)}
+.cta-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;align-items:center}
+.checks{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line);border-radius:var(--r);background:var(--bg2);margin-bottom:56px;overflow:hidden}
+.checks div{padding:20px 22px;border-right:1px solid var(--line)}
+.checks div:last-child{border-right:none}
+.checks b{display:block;font-weight:600;font-size:20px;letter-spacing:-.02em;margin-bottom:4px}
+.checks span{color:var(--muted);font-size:13.5px;line-height:1.45;display:block}
+.history{margin-bottom:64px}
+.history h2{font-size:15px;font-weight:600;margin:0 0 12px;color:var(--muted)}
+.hist-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.hist{display:flex;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--line);background:var(--panel);cursor:pointer;border-radius:var(--r-sm);text-align:left}
+.hist:hover{border-color:var(--line3);background:var(--panel2)}
+.hist .g{font-weight:600;font-size:22px;width:38px;height:38px;border-radius:9px;display:grid;place-items:center;background:var(--bg2);border:1px solid var(--line)}
+.hist b{font-weight:600;font-size:14px}
+.hist small{display:block;color:var(--faint);font-size:12px;line-height:1.4}
+
+/* ring */
+.ring-box{position:relative;aspect-ratio:1;width:100%;max-width:500px;justify-self:center}
 .ring-box svg{width:100%;height:100%;overflow:visible}
-.ring-idle .ringspin{animation:spin 40s linear infinite;transform-origin:300px 300px}
-.sweep{transform-origin:300px 300px;animation:spin 2.4s linear infinite;opacity:0;transition:opacity .4s}
+.ring-idle .ringspin{animation:spin 80s linear infinite;transform-origin:300px 300px}
+.sweep{transform-origin:300px 300px;animation:spin 2.6s linear infinite;opacity:0;transition:opacity .4s}
 .scanning .sweep{opacity:1}
 @keyframes spin{to{transform:rotate(360deg)}}
-.seg{transition:fill .5s, opacity .5s, transform .3s;transform-origin:300px 300px;cursor:default}
+.seg{transition:fill .5s, opacity .5s;cursor:default}
 .seg.clickable{cursor:pointer}
-.seg.clickable:hover{transform:scale(1.025)}
-.seg.dim{opacity:.25}
-.ring-center{font-family:var(--display);text-anchor:middle;fill:var(--bone)}
-.stage-arc{fill:rgba(124,247,255,.08);transition:fill .45s}
-.stage-arc.on{fill:var(--xray)}
-.stage-arc.run{fill:rgba(124,247,255,.45);animation:pulse 1s ease-in-out infinite}
-@keyframes pulse{50%{fill:rgba(124,247,255,.15)}}
+.seg.clickable:hover{filter:brightness(1.15)}
+.seg.dim{opacity:.18}
+.stage-arc{fill:rgba(255,255,255,.06);transition:fill .45s}
+.stage-arc.on{fill:var(--accent)}
+.stage-arc.run{fill:rgba(103,232,249,.5);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{fill:rgba(103,232,249,.15)}}
 
-/* ---------- scanning ---------- */
-#view-scan{display:none;padding:20px 0 60px}
-.scan-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:center}
-.scan-title{font:900 clamp(48px,6vw,86px)/.9 var(--display);margin:0 0 8px;word-break:break-all}
-.scan-sub{color:var(--muted);margin:0 0 26px}
-.term{background:#05102A;border:1px solid var(--line);padding:16px 18px;height:330px;overflow:auto;font:13px/1.7 var(--mono);
-  clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut))}
+/* scanning */
+#view-scan{display:none;padding:56px 0 72px}
+.scan-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:56px;align-items:center}
+.scan-title{font-weight:600;font-size:clamp(28px,3.4vw,42px);letter-spacing:-.035em;line-height:1.1;margin:0 0 6px;word-break:break-all}
+.scan-sub{color:var(--muted);margin:0}
+.bar{height:3px;background:var(--line2);margin:22px 0 16px;border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:3px;transition:width .4s}
+.term{background:#05070A;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.term-head{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line);color:var(--faint);font-size:12.5px}
+.term-head i{width:10px;height:10px;border-radius:50%;background:#1E2430}
+.term-head span{margin-left:8px}
+.term-body{padding:14px 16px;height:320px;overflow:auto;font:12.5px/1.75 var(--mono)}
 .term .l{color:var(--muted);white-space:pre-wrap}
-.term .l b{color:var(--xray);font-weight:600}
+.term .l b{color:var(--accent);font-weight:500}
 .term .l.err{color:var(--crit)}
-.term .cursor{display:inline-block;width:8px;height:15px;background:var(--xray);vertical-align:-2px;animation:blink 1s step-end infinite}
+.term .cursor{display:inline-block;width:7px;height:14px;background:var(--accent);vertical-align:-2px;animation:blink 1s step-end infinite}
 @keyframes blink{50%{opacity:0}}
-.bar{height:4px;background:rgba(124,247,255,.12);margin:18px 0 10px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--xray);box-shadow:0 0 18px var(--xray);transition:width .4s}
 
-/* ---------- report ---------- */
-#view-report{display:none;padding:6px 0 80px}
-.r-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;padding:10px 0 26px;border-bottom:1px solid var(--line)}
-.app-id{display:flex;gap:18px;align-items:center;min-width:0}
-.app-id img,.app-id .noicon{width:72px;height:72px;border-radius:18px;background:var(--panel2);flex:0 0 72px;object-fit:cover;border:1px solid var(--line2)}
-.app-id h1{font:900 clamp(40px,5vw,68px)/.92 var(--display);margin:0;word-break:break-word}
-.app-id .pkg{color:var(--muted);font-size:15px;word-break:break-all}
-.app-id .pkg code{font-family:var(--mono);font-size:13px;color:var(--bone)}
-.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+/* report */
+#view-report{display:none;padding:30px 0 80px}
+.r-head{display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:space-between;padding-bottom:28px}
+.app-id{display:flex;gap:16px;align-items:center;min-width:0}
+.app-id img,.app-id .noicon{width:56px;height:56px;border-radius:14px;background:var(--panel2);flex:0 0 56px;object-fit:cover;border:1px solid var(--line2)}
+.app-id h1{font-weight:600;font-size:30px;letter-spacing:-.035em;line-height:1.15;margin:0;word-break:break-word}
+.app-id .pkg{color:var(--muted);font-size:14px;word-break:break-all}
+.app-id .pkg code{font-size:13px;color:var(--text)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
 
-.r-top{display:grid;grid-template-columns:minmax(300px,440px) minmax(0,1fr);gap:40px;padding:34px 0 10px;align-items:start}
-.ring-legend{font-size:13px;color:var(--muted);text-align:center;margin-top:-4px}
-.ring-legend button{margin-left:6px}
-.meters{display:grid;gap:22px}
-.meter-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
-.panel{background:linear-gradient(180deg,rgba(17,41,95,.75),rgba(13,33,82,.6));border:1px solid var(--line);padding:22px 24px;position:relative;
-  clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut))}
-.panel h3{font:800 24px/1.1 var(--display);margin:0 0 4px;letter-spacing:.01em}
-.panel .sub{color:var(--muted);font-size:14px;margin:0 0 14px}
-.big{font:900 84px/.85 var(--display)}
-.big small{font-size:28px;color:var(--muted);font-weight:700}
-.verdict{font:800 26px/1 var(--display)}
-.scale{position:relative;height:14px;margin:18px 0 8px;background:linear-gradient(90deg,var(--ok) 0 15%,var(--low) 15% 35%,var(--med) 35% 60%,var(--crit) 60% 100%);opacity:.9;
-  clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
-.scale-pin{position:absolute;top:-8px;width:3px;height:30px;background:var(--bone);box-shadow:0 0 12px var(--bone);transition:left 1.2s cubic-bezier(.2,.8,.2,1);left:0}
-.scale-lab{display:flex;justify-content:space-between;font-size:12px;color:var(--faint)}
-.sevbar{display:flex;height:18px;margin:14px 0 12px;gap:3px}
+.r-top{display:grid;grid-template-columns:minmax(320px,460px) minmax(0,1fr);gap:20px;align-items:stretch}
+.panel{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.012));border:1px solid var(--line);border-radius:var(--r);padding:22px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
+.panel h3{font-size:14px;font-weight:500;color:var(--muted);margin:0 0 2px}
+.panel .sub{color:var(--faint);font-size:13px;margin:0 0 14px;line-height:1.5}
+.ring-panel .ring-box{max-width:none}
+.ring-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:26px 22px 18px}
+.ring-legend{font-size:12.5px;color:var(--faint);text-align:center}
+.meters{display:grid;gap:20px;grid-template-rows:auto auto 1fr}
+.meter-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.big{font-weight:600;font-size:56px;line-height:1;letter-spacing:-.05em;margin-top:10px}
+.big small{font-size:18px;color:var(--faint);font-weight:500;letter-spacing:0;margin-left:4px}
+.grade-note{font-size:13px;color:var(--muted);margin-top:10px}
+.verdict{font-weight:600;font-size:22px;letter-spacing:-.025em;margin-top:10px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.verdict span{font-size:14px;color:var(--faint);font-weight:500;letter-spacing:0}
+.scale{position:relative;height:6px;margin:20px 0 8px;border-radius:6px;
+  background:linear-gradient(90deg,var(--ok) 0 15%,var(--low) 15% 35%,var(--med) 35% 60%,var(--crit) 60% 100%);opacity:.85}
+.scale-pin{position:absolute;top:-5px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--text);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--line3);transition:left 1.2s cubic-bezier(.2,.8,.2,1);left:0}
+.scale-lab{display:flex;justify-content:space-between;font-size:11.5px;color:var(--faint)}
+.sevbar{display:flex;height:8px;margin:16px 0 18px;gap:3px;border-radius:8px;overflow:hidden}
 .sevbar i{display:block;height:100%;transition:flex-grow .8s}
-.sevcounts{display:flex;flex-wrap:wrap;gap:6px 18px}
-.sevcounts button{background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:baseline;gap:6px;color:var(--muted)}
-.sevcounts button b{font:800 30px/1 var(--display);color:var(--bone)}
-.sevcounts button.active b{text-decoration:underline;text-underline-offset:5px}
-.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:0 0 10px}
-.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.facts div{padding:14px 16px 14px 0}
-.facts dt{color:var(--faint);font-size:13px}
-.facts dd{margin:0;font-weight:600;word-break:break-word}
+.sevcounts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.sevcounts button{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;text-align:left;transition:border-color .15s}
+.sevcounts button:hover{border-color:var(--line3)}
+.sevcounts button.active{border-color:var(--c);background:color-mix(in srgb, var(--c) 10%, var(--bg2))}
+.sevcounts b{display:block;font-weight:600;font-size:22px;letter-spacing:-.03em;line-height:1.1}
+.sevcounts span{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:0 0 8px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:0;margin:0;overflow:hidden}
+.facts div{padding:14px 18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.facts div:nth-child(4n){border-right:none}
+.facts div:nth-last-child(-n+4){border-bottom:none}
+.facts dt{color:var(--faint);font-size:12.5px}
+.facts dd{margin:2px 0 0;font-weight:500;font-size:14px;word-break:break-word}
 
-.tabs{display:flex;gap:2px;margin:34px 0 0;border-bottom:1px solid var(--line2);overflow-x:auto;scrollbar-width:thin}
-.tab{background:none;border:none;padding:12px 18px 10px;cursor:pointer;color:var(--muted);font-weight:600;font-size:15px;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-1px}
-.tab:hover{color:var(--bone)}
-.tab[aria-selected="true"]{color:var(--xray);border-bottom-color:var(--xray)}
-.tab .n{font-size:12px;color:var(--faint);margin-left:4px}
-.tabpanel{padding-top:24px}
+.tabs{display:flex;gap:2px;margin:36px 0 0;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tab{background:none;border:none;padding:12px 11px;cursor:pointer;color:var(--muted);font-weight:500;font-size:13.5px;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:7px}
+.tab:hover{color:var(--text)}
+.tab[aria-selected="true"]{color:var(--text);border-bottom-color:var(--text)}
+.tab .n{font-size:11.5px;color:var(--faint);background:var(--panel2);border-radius:999px;padding:1px 7px}
+.tabpanel{padding-top:22px}
 
-.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
-.search{flex:1 1 260px;background:#05102A;border:1px solid var(--line2);color:var(--bone);padding:11px 14px;font:inherit;border-radius:6px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.search{flex:1 1 280px;height:38px;background:var(--panel);border:1px solid var(--line2);color:var(--text);padding:0 14px 0 36px;font:inherit;font-size:14px;border-radius:var(--r-sm);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%235B6577' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center}
+.search:focus{border-color:var(--line3);outline:none}
 .search::placeholder{color:var(--faint)}
-.chip{border:1px solid var(--line2);background:none;border-radius:999px;padding:6px 12px;cursor:pointer;font-size:14px;color:var(--muted);display:inline-flex;gap:6px;align-items:center}
-.chip[aria-pressed="true"]{border-color:var(--bone);color:var(--bone);background:rgba(230,238,255,.08)}
-.toggle{display:inline-flex;gap:8px;align-items:center;color:var(--muted);font-size:14px;cursor:pointer}
-.toggle input{accent-color:var(--xray);width:16px;height:16px}
+.chip{height:32px;border:1px solid var(--line2);background:var(--panel);border-radius:999px;padding:0 12px;cursor:pointer;font-size:13px;color:var(--muted);display:inline-flex;gap:7px;align-items:center}
+.chip:hover{color:var(--text)}
+.chip[aria-pressed="true"]{border-color:var(--line3);color:var(--text);background:var(--panel2)}
+.toggle{display:inline-flex;gap:8px;align-items:center;color:var(--muted);font-size:13px;cursor:pointer;margin-left:4px}
+.toggle input{accent-color:var(--accent);width:15px;height:15px}
 
-.finding{border-left:4px solid var(--c,var(--info));background:rgba(13,33,82,.55);margin-bottom:8px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
-.finding>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 18px}
+.flist{display:grid;gap:8px}
+.finding{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;transition:border-color .15s}
+.finding:hover{border-color:var(--line2)}
+.finding[open]{border-color:var(--line2);background:var(--panel)}
+.finding>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:88px minmax(0,1fr) auto 18px;gap:14px;align-items:center;padding:13px 16px}
 .finding>summary::-webkit-details-marker{display:none}
-.finding>summary:hover{background:rgba(124,247,255,.04)}
-.sev{font:800 17px/1 var(--display);color:var(--c);letter-spacing:.02em}
-.f-title{font-weight:600}
+.finding>summary::after{content:"";width:8px;height:8px;border-right:1.5px solid var(--faint);border-bottom:1.5px solid var(--faint);transform:rotate(45deg);transition:transform .2s;justify-self:center;margin-top:-4px}
+.finding[open]>summary::after{transform:rotate(225deg);margin-top:4px}
+.sev{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--c);background:color-mix(in srgb, var(--c) 13%, transparent);
+  border:1px solid color-mix(in srgb, var(--c) 28%, transparent);border-radius:6px;padding:3px 8px;justify-self:start}
+.f-title{font-weight:500;font-size:14.5px}
 .f-meta{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.tag{font-size:12px;border:1px solid var(--line2);border-radius:4px;padding:2px 7px;color:var(--muted);white-space:nowrap}
-.tag.lib{border-color:transparent;background:rgba(147,167,214,.14)}
-.tag.o{color:var(--xray);border-color:rgba(124,247,255,.4)}
-.f-body{padding:4px 18px 20px 128px;display:grid;gap:16px}
-.f-body p{margin:0;max-width:78ch;color:#C9D6F5}
-.f-body h4{margin:0 0 6px;font:700 13px/1 var(--body);color:var(--faint);letter-spacing:.02em}
-pre.code{margin:0;background:#05102A;border:1px solid var(--line);padding:12px 14px;overflow:auto;font:12.5px/1.6 var(--mono);color:#CFE9FF;max-height:320px;white-space:pre-wrap;word-break:break-word}
-.refs a{display:block;font-size:14px;word-break:break-all}
-.empty{padding:50px 0;text-align:center;color:var(--muted)}
-.empty b{display:block;font:800 34px/1 var(--display);color:var(--bone);margin-bottom:6px}
+.tag{font-size:11.5px;border:1px solid var(--line2);border-radius:6px;padding:2px 7px;color:var(--muted);white-space:nowrap;font-family:var(--mono)}
+.tag.lib{background:var(--panel2);border-color:transparent}
+.tag.o{color:var(--accent);border-color:rgba(103,232,249,.28)}
+.f-body{padding:4px 16px 20px 118px;display:grid;gap:16px;border-top:1px solid var(--line);padding-top:16px}
+.f-body p{margin:0;max-width:76ch;color:#C3CAD6;line-height:1.65}
+.f-body h4{margin:0 0 7px;font-weight:500;font-size:12.5px;color:var(--faint)}
+pre.code{margin:0;background:#05070A;border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow:auto;font-size:12.5px;line-height:1.65;color:#C9D4E5;max-height:320px;white-space:pre-wrap;word-break:break-word}
+.refs a{display:block;font-size:13px;word-break:break-all;line-height:1.7}
+.empty{padding:56px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line2);border-radius:var(--r)}
+.empty b{display:block;font-weight:600;font-size:17px;color:var(--text);margin-bottom:4px}
 
-table.t{width:100%;border-collapse:collapse;font-size:14px}
-table.t th{text-align:left;color:var(--faint);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line2);position:sticky;top:0;background:var(--bg)}
-table.t td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;word-break:break-word}
-table.t tr:hover td{background:rgba(124,247,255,.03)}
-.tscroll{max-height:620px;overflow:auto;border:1px solid var(--line)}
-.lvl{font-size:12px;padding:2px 8px;border-radius:4px;white-space:nowrap}
-.lvl.dangerous{background:rgba(255,138,61,.16);color:var(--high)}
-.lvl.special{background:rgba(255,61,127,.16);color:var(--crit)}
-.lvl.signature{background:rgba(255,61,127,.28);color:#FFC2D6}
-.lvl.normal{background:rgba(147,167,214,.14);color:var(--muted)}
-.lvl.custom{background:rgba(124,247,255,.12);color:var(--xray)}
-.riskbar{width:90px;height:6px;background:rgba(255,255,255,.07);display:inline-block;vertical-align:middle}
-.riskbar i{display:block;height:100%}
-.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
-.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.tscroll{max-height:620px;overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+table.t th{text-align:left;color:var(--faint);font-weight:500;font-size:12.5px;padding:10px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel2);z-index:1}
+table.t td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;word-break:break-word}
+table.t tr:last-child td{border-bottom:none}
+table.t tr:hover td{background:rgba(255,255,255,.015)}
+.lvl{font-size:11.5px;padding:2px 8px;border-radius:6px;white-space:nowrap;font-weight:500}
+.lvl.dangerous{background:rgba(251,146,60,.12);color:var(--high)}
+.lvl.special{background:rgba(244,63,94,.12);color:var(--crit)}
+.lvl.signature{background:rgba(244,63,94,.2);color:#FDA4AF}
+.lvl.normal{background:rgba(139,149,167,.12);color:var(--muted)}
+.lvl.custom{background:var(--accent-soft);color:var(--accent)}
+.riskbar{width:84px;height:4px;background:var(--line2);display:inline-block;vertical-align:middle;border-radius:4px;overflow:hidden}
+.riskbar i{display:block;height:100%;border-radius:4px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.stat{font-weight:600;font-size:34px;letter-spacing:-.04em;line-height:1.1;margin-top:6px}
 .list{margin:0;padding:0;list-style:none}
-.list li{padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
-.list li:last-child{border-bottom:none}
-.w{font:800 20px/1 var(--display);color:var(--crit);min-width:44px}
-.w.cap{color:var(--med)}
-.list .ev{display:block;color:var(--faint);font:12px/1.5 var(--mono);word-break:break-all;margin-top:3px}
-.kv{display:grid;grid-template-columns:150px minmax(0,1fr);gap:6px 14px;font-size:14px}
+.list li{padding:11px 0;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:flex-start}
+.list li:last-child{border-bottom:none;padding-bottom:0}
+.w{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--crit);background:rgba(244,63,94,.1);border-radius:6px;padding:2px 7px;min-width:38px;text-align:center;margin-top:1px}
+.w.cap{color:var(--med);background:rgba(251,191,36,.1)}
+.list .ev{display:block;color:var(--faint);font:12px/1.55 var(--mono);word-break:break-all;margin-top:3px}
+.kv{display:grid;grid-template-columns:140px minmax(0,1fr);gap:8px 16px;font-size:13.5px;margin:0}
 .kv dt{color:var(--faint)}
 .kv dd{margin:0;word-break:break-all}
-.kv dd code{font:12.5px var(--mono)}
-.scheme{display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-weight:600}
-.pill{display:inline-block;padding:4px 10px;border:1px solid var(--line2);border-radius:999px;margin:0 6px 6px 0;font-size:14px}
-.pill.on{border-color:var(--ok);color:var(--ok)}
-.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(120px);visibility:hidden;background:var(--bone);color:#04122E;padding:12px 20px;font-weight:700;transition:transform .3s;z-index:50;border-radius:6px}
+.kv dd code{font-size:12.5px}
+.scheme{display:inline-flex;align-items:center;gap:7px;margin:0 16px 4px 0;font-weight:500;font-size:14px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border:1px solid var(--line2);border-radius:999px;margin:0 6px 8px 0;font-size:13px;color:var(--faint)}
+.pill.on{border-color:rgba(52,211,153,.35);color:var(--ok);background:rgba(52,211,153,.07)}
+.note{color:var(--faint);font-size:13px;margin-top:16px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(120px);visibility:hidden;background:var(--panel2);border:1px solid var(--line3);color:var(--text);
+  padding:11px 18px;font-weight:500;font-size:14px;transition:transform .3s;z-index:50;border-radius:var(--r-sm);box-shadow:0 12px 40px rgba(0,0,0,.5)}
 .toast.show{transform:translateX(-50%) translateY(0);visibility:visible}
-.toast.err{background:var(--crit);color:#fff}
-footer{color:var(--faint);font-size:13px;padding:30px 0 40px;border-top:1px solid var(--line)}
+.toast.err{border-color:rgba(244,63,94,.5);color:#FDA4AF}
+footer{color:var(--faint);font-size:12.5px;padding:26px 0 40px;border-top:1px solid var(--line);margin-top:20px}
 
-@media (max-width:980px){
+@media (max-width:1000px){
   .hero,.scan-grid,.r-top{grid-template-columns:1fr}
-  .ring-box{max-width:420px}
+  .hero{padding-top:44px}
+  .ring-box{max-width:400px}
   .checks{grid-template-columns:repeat(2,1fr)}
-  .checks div{border-right:none;border-bottom:1px solid var(--line)}
+  .checks div{border-bottom:1px solid var(--line)}
   .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .grid2,.grid3,.meter-row{grid-template-columns:1fr}
-  .r-head{grid-template-columns:1fr}
-  .actions{justify-content:flex-start}
+  .facts div{border-right:1px solid var(--line)!important;border-bottom:1px solid var(--line)!important}
+  .grid2,.meter-row{grid-template-columns:1fr}
+  .grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:640px){
   .wrap{padding:0 16px}
-  .finding>summary{grid-template-columns:1fr;gap:6px}
-  .f-meta{justify-content:flex-start}
-  .f-body{padding:4px 16px 18px}
+  .sevcounts{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .finding>summary{grid-template-columns:auto minmax(0,1fr);gap:10px}
+  .finding>summary::after{display:none}
+  .f-meta{grid-column:1/-1;justify-content:flex-start}
+  .f-body{padding:14px 16px 18px}
   .brand span{display:none}
   .kv{grid-template-columns:1fr}
+  .checks{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -253,12 +290,11 @@ footer{color:var(--faint);font-size:13px;padding:30px 0 40px;border-top:1px soli
 }
 @media print{
   body{background:#fff;color:#111}
-  header.top,.actions,.tabs,.filters,#view-landing,#view-scan,.ring-legend button,footer,.lens{display:none!important}
+  header.top,.actions,.tabs,.filters,#view-landing,#view-scan,.ring-legend,footer,.lens{display:none!important}
   #view-report{display:block!important}
-  .panel,.finding{background:#fff;border-color:#ccc;color:#111;clip-path:none}
-  .tabpanel{display:block!important}
+  .panel,.finding,.tscroll{background:#fff;border-color:#ddd;color:#111;box-shadow:none}
   .f-body p,.panel .sub,.app-id .pkg{color:#333}
-  pre.code{background:#f5f5f5;color:#111;border-color:#ddd}
+  pre.code{background:#f6f6f6;color:#111;border-color:#ddd}
   .finding{break-inside:avoid}
 }
 </style>
@@ -269,12 +305,12 @@ footer{color:var(--faint);font-size:13px;padding:30px 0 40px;border-top:1px soli
 <div class="wrap">
   <header class="top">
     <a class="brand" href="#" id="home" aria-label="APK X-Ray home">
-      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="26" fill="none" stroke="#7CF7FF" stroke-width="5" stroke-dasharray="30 11"/><circle cx="32" cy="32" r="9" fill="#FF3D7F"/></svg>
-      <b>APK X-Ray</b><span>by team KrackHack</span>
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#131823"/><circle cx="32" cy="32" r="19" fill="none" stroke="#67E8F9" stroke-width="4" stroke-dasharray="22 8"/><circle cx="32" cy="32" r="6" fill="#F43F5E"/></svg>
+      <b>APK X-Ray</b><span>KrackHack</span>
     </a>
     <nav>
-      <a class="ghost" href="/docs" target="_blank" rel="noopener">API</a>
-      <a class="ghost" href="https://github.com/Arpit052/apk_scanner_krackhack" target="_blank" rel="noopener">GitHub</a>
+      <a class="navlink" href="/docs" target="_blank" rel="noopener">API</a>
+      <a class="navlink" href="https://github.com/Arpit052/apk_scanner_krackhack" target="_blank" rel="noopener">GitHub</a>
     </nav>
   </header>
 
@@ -282,28 +318,28 @@ footer{color:var(--faint);font-size:13px;padding:30px 0 40px;border-top:1px soli
   <main id="view-landing">
     <section class="hero">
       <div>
-        <h1>Put any APK<span class="ghosted">under the X-ray.</span></h1>
-        <p class="lede">Drop an Android app and we take it apart: manifest, every DEX method call, certificates, secrets and SDKs. Each finding is mapped to the OWASP Mobile Top 10 (2024), with the exact class it lives in and the fix.</p>
+        <span class="badge"><i></i>Mapped to OWASP Mobile Top 10 (2024)</span>
+        <h1>Put any Android app under the X-ray.</h1>
+        <p class="lede">Upload an APK and get a full security teardown in seconds: manifest, every DEX method call, certificates, hardcoded secrets and third-party SDKs. Each finding comes with the class it lives in and how to fix it.</p>
         <label class="drop" id="drop" tabindex="0">
           <input type="file" id="file" accept=".apk,.xapk,.apks,.apkm" class="sr">
-          <span class="glyph" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7CF7FF" stroke-width="1.8"><path d="M12 16V4m0 0-5 5m5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg></span>
-          <span><strong id="drop-title">Drop an APK here, or click to browse</strong><small id="drop-sub">.apk, .xapk or .apks, up to 300 MB. Files are deleted right after the scan.</small></span>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#E8ECF2" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0-4 4m4-4 4 4"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></span>
+          <span><strong id="drop-title">Drop an APK here, or click to browse</strong><small id="drop-sub">.apk, .xapk or .apks up to 300 MB. Files are deleted right after the scan.</small></span>
         </label>
         <div class="cta-row">
           <button class="btn" id="scan-btn" disabled>Start scan</button>
-          <button class="link" id="demo-btn">See a sample report</button>
-          <span class="picked" id="picked"></span>
+          <button class="link accent" id="demo-btn">View a sample report</button>
         </div>
       </div>
       <div class="ring-box ring-idle" id="ring-landing"></div>
     </section>
 
     <section class="checks" aria-label="What gets checked">
-      <div><b>DEX</b><span>Bytecode call-site tracing with constant tracking</span></div>
-      <div><b>M1–M10</b><span>OWASP Mobile Top 10 2024 and MASVS mapping</span></div>
-      <div><b>v1–v4</b><span>Signature schemes, debug keys and Janus</span></div>
-      <div><b>30+</b><span>Secret formats, from AWS keys to Telegram bots</span></div>
-      <div><b>0–100</b><span>Malware risk model built on capabilities and combos</span></div>
+      <div><b>Bytecode</b><span>Traces dangerous API calls and their arguments in every DEX</span></div>
+      <div><b>M1 to M10</b><span>Mapped to OWASP 2024, MASVS and CWE</span></div>
+      <div><b>Signatures</b><span>v1 to v4 schemes, debug keys and Janus</span></div>
+      <div><b>30+ secrets</b><span>AWS, GCP, Stripe, GitHub, Telegram, OpenAI and more</span></div>
+      <div><b>Malware risk</b><span>0 to 100 score from capabilities and known patterns</span></div>
     </section>
 
     <section class="history" id="history" hidden>
@@ -320,7 +356,7 @@ footer{color:var(--faint);font-size:13px;padding:30px 0 40px;border-top:1px soli
         <h1 class="scan-title" id="scan-name">app.apk</h1>
         <p class="scan-sub" id="scan-sub">Uploading</p>
         <div class="bar"><i id="scan-bar"></i></div>
-        <div class="term" id="term" role="log"></div>
+        <div class="term"><div class="term-head"><i></i><i></i><i></i><span>scan log</span></div><div class="term-body" id="term" role="log"></div></div>
       </div>
     </div>
   </main>
@@ -336,28 +372,27 @@ footer{color:var(--faint);font-size:13px;padding:30px 0 40px;border-top:1px soli
         </div>
       </div>
       <div class="actions">
-        <button class="ghost" id="exp-json">Download JSON</button>
-        <button class="ghost" id="exp-sarif">Download SARIF</button>
-        <button class="ghost" id="exp-print">Print / PDF</button>
+        <button class="btn-2" id="exp-json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>JSON</button>
+        <button class="btn-2" id="exp-sarif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>SARIF</button>
+        <button class="btn-2" id="exp-print"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg>Print / PDF</button>
         <button class="btn" id="new-scan">Scan another app</button>
       </div>
     </section>
 
     <section class="r-top">
-      <div>
+      <div class="panel ring-panel">
         <div class="ring-box" id="ring-report"></div>
-        <div class="ring-legend" id="ring-legend">Click a segment of the wheel to filter findings by OWASP risk.</div>
+        <div class="ring-legend" id="ring-legend">Click a segment to filter findings by OWASP risk</div>
       </div>
       <div class="meters">
         <div class="meter-row">
           <div class="panel">
             <h3>Security score</h3>
-            <p class="sub" id="score-sub"></p>
             <div class="big" id="score-big">0<small>/100</small></div>
+            <div class="grade-note" id="score-sub"></div>
           </div>
           <div class="panel">
             <h3>Malware risk</h3>
-            <p class="sub" id="mal-note">Heuristic, from capabilities and known malware patterns</p>
             <div class="verdict" id="mal-verdict"></div>
             <div class="scale" aria-hidden="true"><span class="scale-pin" id="mal-pin"></span></div>
             <div class="scale-lab"><span>Clean</span><span>Low</span><span>Suspicious</span><span>Malicious</span></div>
@@ -368,7 +403,7 @@ footer{color:var(--faint);font-size:13px;padding:30px 0 40px;border-top:1px soli
           <div class="sevbar" id="sevbar"></div>
           <div class="sevcounts" id="sevcounts"></div>
         </div>
-        <dl class="facts" id="facts"></dl>
+        <dl class="panel facts" id="facts"></dl>
       </div>
     </section>
 
@@ -377,7 +412,7 @@ footer{color:var(--faint);font-size:13px;padding:30px 0 40px;border-top:1px soli
   </main>
 
   <footer>
-    Static analysis only, so results are leads rather than proof. Confirm critical issues manually or with dynamic testing. OWASP and MASVS are projects of the OWASP Foundation.
+    Static analysis only: treat results as leads and confirm critical issues manually or with dynamic testing. OWASP and MASVS are projects of the OWASP Foundation.
   </footer>
 </div>
 <div class="toast" id="toast" role="status"></div>
@@ -387,7 +422,8 @@ footer{color:var(--faint);font-size:13px;padding:30px 0 40px;border-top:1px soli
 const $ = s => document.querySelector(s);
 const SEV = ["Critical","High","Medium","Low","Info"];
 const SEVC = {Critical:"var(--crit)",High:"var(--high)",Medium:"var(--med)",Low:"var(--low)",Info:"var(--info)"};
-const SEVHEX = {Critical:"#FF3D7F",High:"#FF8A3D",Medium:"#FFC94A",Low:"#6FA8FF",Info:"#8A9BC4"};
+const SEVHEX = {Critical:"#F43F5E",High:"#FB923C",Medium:"#FBBF24",Low:"#60A5FA",Info:"#64748B"};
+const GRADEC = {A:"#34D399",B:"#60A5FA",C:"#FBBF24",D:"#FB923C",F:"#F43F5E"};
 const OWASP_SHORT = {M1:"Credentials",M2:"Supply chain",M3:"AuthN/AuthZ",M4:"Input/output",M5:"Communication",M6:"Privacy",M7:"Binary protection",M8:"Misconfiguration",M9:"Data storage",M10:"Cryptography"};
 const STAGES = [["manifest","Manifest"],["signing","Signature"],["dex","DEX"],["code","Code"],["secrets","Secrets"],["intel","Intel"]];
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -413,49 +449,40 @@ function arc(cx,cy,r1,r2,a0,a1){
   return `M${x0},${y0} A${r2},${r2} 0 ${large} 1 ${x1},${y1} L${x2},${y2} A${r1},${r1} 0 ${large} 0 ${x3},${y3} Z`;
 }
 function ringSVG(mode, report){
-  const C=300, segs=10, gap=2.2;
+  const C=300, segs=10, gap=1.6, R1=204, R2=226;
+  const rad=a=>a*Math.PI/180, px=(r,a)=>C+r*Math.sin(rad(a)), py=(r,a)=>C-r*Math.cos(rad(a));
   let s=`<svg viewBox="0 0 600 600" role="img" aria-label="${mode==='report'?'OWASP Mobile Top 10 wheel':'Scanner'}">
   <defs>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="55%" stop-color="#7CF7FF" stop-opacity="0"/><stop offset="100%" stop-color="#7CF7FF" stop-opacity=".12"/></radialGradient>
-    <linearGradient id="sw" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7CF7FF" stop-opacity="0"/><stop offset="1" stop-color="#7CF7FF" stop-opacity=".55"/></linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="60%" stop-color="#67E8F9" stop-opacity="0"/><stop offset="100%" stop-color="#67E8F9" stop-opacity=".06"/></radialGradient>
+    <linearGradient id="sw" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#67E8F9" stop-opacity="0"/><stop offset="1" stop-color="#67E8F9" stop-opacity=".28"/></linearGradient>
   </defs>
-  <circle cx="300" cy="300" r="290" fill="url(#glow)"/>
+  <circle cx="300" cy="300" r="298" fill="url(#glow)"/>
   <g class="ringspin">`;
-  for(let i=0;i<120;i++){ const a=i*3, long=i%10===0; const r1=long?268:274, r2=282;
-    const x1=C+r1*Math.sin(a*Math.PI/180), y1=C-r1*Math.cos(a*Math.PI/180), x2=C+r2*Math.sin(a*Math.PI/180), y2=C-r2*Math.cos(a*Math.PI/180);
-    s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#7CF7FF" stroke-opacity="${long?.7:.25}" stroke-width="${long?2:1}"/>`; }
+  for(let i=0;i<120;i++){ const a=i*3, long=i%10===0, r1=long?256:261, r2=266;
+    s+=`<line x1="${px(r1,a)}" y1="${py(r1,a)}" x2="${px(r2,a)}" y2="${py(r2,a)}" stroke="#8B95A7" stroke-opacity="${long?.45:.14}" stroke-width="1"/>`; }
   s+=`</g>`;
-  // outer OWASP ring
   for(let i=0;i<segs;i++){
-    const id="M"+(i+1), a0=i*36+gap, a1=(i+1)*36-gap;
-    let fill="rgba(124,247,255,.10)", extra=0, cls="seg";
+    const id="M"+(i+1), a0=i*36+gap, a1=(i+1)*36-gap, mid=(a0+a1)/2;
+    let fill="rgba(255,255,255,.045)", extra=0, cls="seg", has=false;
     if(mode==="report"){
-      const o=report.owasp[id]; if(o.count){ fill=SEVHEX[o.worst]; extra=Math.min(26, 8+o.count*4); cls+=" clickable"; } else { fill="rgba(75,227,160,.22)"; }
+      const o=report.owasp[id]; has=o.count>0;
+      if(has){ fill=SEVHEX[o.worst]; extra=Math.min(18, 4+o.count*3); cls+=" clickable"; } else { fill="rgba(52,211,153,.16)"; }
       if(state.owasp && state.owasp!==id) cls+=" dim";
     }
-    s+=`<path class="${cls}" data-owasp="${id}" d="${arc(C,C,196,236+extra,a0,a1)}" fill="${fill}" style="${mode==='report'&&!reduceMotion&&state.animateRing?`opacity:0;transition-delay:${i*70}ms`:''}"><title>${id} ${OWASP_SHORT[id]}${mode==='report'?` – ${report.owasp[id].count} finding(s)`:''}</title></path>`;
-    const mid=(a0+a1)/2, lr=mode==="report"?302:252, lx=C+lr*Math.sin(mid*Math.PI/180), ly=C-lr*Math.cos(mid*Math.PI/180);
-    s+=`<text x="${lx}" y="${ly+5}" text-anchor="middle" font-family="Big Shoulders Display" font-weight="800" font-size="17" fill="${mode==='report'&&report.owasp[id].count?'#E6EEFF':'#5C70A3'}">${id}</text>`;
-    if(mode==="report" && report.owasp[id].count){
-      const nr=216+extra/2, nx=C+nr*Math.sin(mid*Math.PI/180), ny=C-nr*Math.cos(mid*Math.PI/180);
-      s+=`<text x="${nx}" y="${ny+6}" text-anchor="middle" font-family="Big Shoulders Display" font-weight="900" font-size="19" fill="#04122E" pointer-events="none">${report.owasp[id].count}</text>`;
-    }
+    s+=`<path class="${cls}" data-owasp="${id}" d="${arc(C,C,R1,R2+extra,a0,a1)}" fill="${fill}" style="${mode==='report'&&!reduceMotion&&state.animateRing?`opacity:0;transition-delay:${i*60}ms`:''}"><title>${id} ${OWASP_SHORT[id]}${mode==='report'?`: ${report.owasp[id].count} finding(s)`:''}</title></path>`;
+    s+=`<text x="${px(288,mid)}" y="${py(288,mid)+5}" text-anchor="middle" font-family="Geist, sans-serif" font-weight="500" font-size="15" fill="${has?'#E8ECF2':'#5B6577'}">${id}</text>`;
+    if(has){ const nr=(R1+R2+extra)/2; s+=`<text x="${px(nr,mid)}" y="${py(nr,mid)+4.5}" text-anchor="middle" font-family="Geist, sans-serif" font-weight="600" font-size="13" fill="#07090D" pointer-events="none">${report.owasp[id].count}</text>`; }
   }
-  // inner stage ring
-  STAGES.forEach(([k],i)=>{ const a0=i*60+3, a1=(i+1)*60-3;
-    const on = mode==="report" ? " on" : ""; s+=`<path class="stage-arc${on}" data-stage="${k}" d="${arc(C,C,170,182,a0,a1)}"/>`; });
-  // sweep
-  s+=`<path class="sweep" d="${arc(C,C,40,190,0,50)}" fill="url(#sw)"/>`;
-  // center
+  STAGES.forEach(([k],i)=>{ const a0=i*60+2, a1=(i+1)*60-2; s+=`<path class="stage-arc${mode==='report'?' on':''}" data-stage="${k}" d="${arc(C,C,186,190,a0,a1)}"/>`; });
+  s+=`<path class="sweep" d="${arc(C,C,60,200,0,46)}" fill="url(#sw)"/>`;
+  s+=`<circle cx="300" cy="300" r="166" fill="#0A0D13" stroke="rgba(255,255,255,.07)"/>`;
   if(mode==="report"){
-    const g=report.security.grade, gc={A:"#4BE3A0",B:"#6FA8FF",C:"#FFC94A",D:"#FF8A3D",F:"#FF3D7F"}[g];
-    s+=`<circle cx="300" cy="300" r="150" fill="#071330" stroke="rgba(124,247,255,.25)"/>
-        <text class="ring-center" x="300" y="345" font-size="168" font-weight="900" fill="${gc}" id="grade-text">${g}</text>
-        <text class="ring-center" x="300" y="388" font-size="20" font-weight="700" fill="#93A7D6">Grade</text>`;
+    const g=report.security.grade;
+    s+=`<text x="300" y="338" text-anchor="middle" font-family="Geist, sans-serif" font-size="128" font-weight="600" letter-spacing="-6" fill="${GRADEC[g]}">${g}</text>
+        <text x="300" y="382" text-anchor="middle" font-family="Geist, sans-serif" font-size="15" font-weight="500" fill="#5B6577">Security grade</text>`;
   } else {
-    s+=`<circle cx="300" cy="300" r="150" fill="#071330" stroke="rgba(124,247,255,.25)"/>
-        <text class="ring-center" x="300" y="330" font-size="${mode==='scan'?96:64}" font-weight="900" id="${mode}-center">${mode==='scan'?'0%':'APK'}</text>
-        <text class="ring-center" x="300" y="372" font-size="20" font-weight="700" fill="#93A7D6" id="${mode}-caption">${mode==='scan'?'uploading':'drop to scan'}</text>`;
+    s+=`<text x="300" y="${mode==='scan'?322:318}" text-anchor="middle" font-family="Geist, sans-serif" font-size="${mode==='scan'?76:58}" font-weight="600" letter-spacing="-3" fill="#E8ECF2" id="${mode}-center">${mode==='scan'?'0%':'APK'}</text>
+        <text x="300" y="358" text-anchor="middle" font-family="Geist, sans-serif" font-size="15" font-weight="500" fill="#5B6577" id="${mode}-caption">${mode==='scan'?'uploading':'waiting for a file'}</text>`;
   }
   return s+`</svg>`;
 }
@@ -467,7 +494,7 @@ function pick(f){
   if(!f) return;
   if(!/\.(apk|xapk|apks|apkm)$/i.test(f.name)){ toast("That file isn't an APK. Choose a .apk, .xapk or .apks file.", true); return; }
   if(f.size>300*1048576){ toast("This APK is larger than 300 MB, which is the upload limit.", true); return; }
-  state.file=f; $("#drop-title").textContent=f.name; $("#drop-sub").textContent=fmtBytes(f.size)+" ready to scan";
+  state.file=f; drop.classList.add("ready"); $("#drop-title").textContent=f.name; $("#drop-sub").textContent=fmtBytes(f.size)+" ready to scan";
   $("#scan-btn").disabled=false; $("#scan-btn").focus();
 }
 fileIn.addEventListener("change", e=>pick(e.target.files[0]));
@@ -482,7 +509,7 @@ $("#demo-btn").addEventListener("click", async ()=>{
   catch{ toast("The sample report couldn't be loaded.", true); }
 });
 $("#home").addEventListener("click", e=>{ e.preventDefault(); show("landing"); });
-$("#new-scan").addEventListener("click", ()=>{ state.file=null; $("#scan-btn").disabled=true; $("#drop-title").textContent="Drop an APK here, or click to browse"; $("#drop-sub").textContent=".apk, .xapk or .apks, up to 300 MB. Files are deleted right after the scan."; fileIn.value=""; show("landing"); });
+$("#new-scan").addEventListener("click", ()=>{ state.file=null; $("#scan-btn").disabled=true; drop.classList.remove("ready"); $("#drop-title").textContent="Drop an APK here, or click to browse"; $("#drop-sub").textContent=".apk, .xapk or .apks up to 300 MB. Files are deleted right after the scan."; fileIn.value=""; show("landing"); });
 
 function show(v){
   ["landing","scan","report"].forEach(x=>$("#view-"+x).style.display = x===v ? "block" : "none");
@@ -553,8 +580,8 @@ function renderRing(){
   document.querySelectorAll("#ring-report .seg.clickable").forEach(el=>el.addEventListener("click",()=>{
     const id=el.dataset.owasp; state.owasp = state.owasp===id ? null : id; state.tab="findings"; renderRing(); renderTabs(); renderPanel(); }));
   $("#ring-legend").innerHTML = state.owasp
-    ? `Showing ${esc(state.owasp)} ${esc(rep.owasp[state.owasp].title)} <button class="link" id="clear-owasp">Show all</button>`
-    : `Click a segment of the wheel to filter findings by OWASP risk.`;
+    ? `Showing ${esc(state.owasp)}: ${esc(rep.owasp[state.owasp].title)} <button class="link accent" id="clear-owasp">Show all</button>`
+    : `Click a segment to filter findings by OWASP risk`;
   const c=$("#clear-owasp"); if(c) c.onclick=()=>{ state.owasp=null; renderRing(); renderPanel(); };
 }
 function countUp(el, to, suffix){
@@ -564,18 +591,18 @@ function countUp(el, to, suffix){
 function renderMeters(){
   const r=state.report, s=r.summary, sec=r.security, m=r.malware;
   countUp($("#score-big"), sec.score, "<small>/100</small>");
-  $("#score-big").style.color = {A:"var(--ok)",B:"var(--low)",C:"var(--med)",D:"var(--high)",F:"var(--crit)"}[sec.grade];
+  $("#score-big").style.color = GRADEC[sec.grade];
   $("#score-sub").textContent = sec.score>=85 ? "Solid. Only minor issues found." : sec.score>=55 ? "Some issues worth fixing before release." : "Serious weaknesses. Fix the critical and high items first.";
-  $("#mal-verdict").innerHTML = `${esc(m.label)} <span style="color:var(--muted);font-weight:700">${m.score}/100</span>`;
+  $("#mal-verdict").innerHTML = `${esc(m.label)} <span>${m.score} / 100</span>`;
   $("#mal-verdict").style.color = {clean:"var(--ok)",low:"var(--low)",suspicious:"var(--med)",malicious:"var(--crit)"}[m.verdict];
-  setTimeout(()=>$("#mal-pin").style.left=`calc(${Math.min(99,m.score)}% - 1px)`, 60);
+  setTimeout(()=>$("#mal-pin").style.left=`${Math.max(1,Math.min(99,m.score))}%`, 60);
   $("#sev-title").textContent = `${s.total} finding${s.total===1?"":"s"}`;
   $("#sevbar").innerHTML = SEV.filter(k=>s[k.toLowerCase()]).map(k=>`<i style="flex-grow:${s[k.toLowerCase()]};background:${SEVC[k]}" title="${k}: ${s[k.toLowerCase()]}"></i>`).join("") || `<i style="flex-grow:1;background:var(--ok)"></i>`;
-  $("#sevcounts").innerHTML = SEV.map(k=>`<button data-sev="${k}" class="${state.sev.has(k)?"active":""}" aria-pressed="${state.sev.has(k)}"><span class="dot" style="background:${SEVC[k]}"></span><b>${s[k.toLowerCase()]}</b>${k}</button>`).join("");
+  $("#sevcounts").innerHTML = SEV.map(k=>`<button data-sev="${k}" style="--c:${SEVC[k]}" class="${state.sev.has(k)?"active":""}" aria-pressed="${state.sev.has(k)}"><b>${s[k.toLowerCase()]}</b><span><i class="dot" style="background:${SEVC[k]}"></i>${k}</span></button>`).join("");
   document.querySelectorAll("#sevcounts button").forEach(b=>b.onclick=()=>{ toggleSev(b.dataset.sev); });
   const st=r.stats||{};
   const facts=[["Target / min SDK",`${r.target_sdk} / ${r.min_sdk}`],["Size",`${r.file_size_mb} MB`],["Code",`${(st.classes||0).toLocaleString()} classes in ${st.dex_files||0} DEX`],["Scan time",`${r.scan_metadata.scan_time_seconds}s`],
-    ["Frameworks",(r.frameworks||[]).join(", ")||"–"],["Trackers",(r.trackers||[]).length],["Signature",["v1","v2","v3","v4"].filter(v=>r.signing&&r.signing[v]).join(" + ")||"unsigned"],["SHA-256",`<code style="font:12px var(--mono)">${esc((r.file_hash_sha256||"").slice(0,16))}…</code>`]];
+    ["Frameworks",(r.frameworks||[]).join(", ")||"–"],["Trackers",(r.trackers||[]).length],["Signature",["v1","v2","v3","v4"].filter(v=>r.signing&&r.signing[v]).join(" + ")||"unsigned"],["SHA-256",`<code style="font-size:12.5px">${esc((r.file_hash_sha256||"").slice(0,16))}…</code>`]];
   $("#facts").innerHTML = facts.map(([k,v])=>`<div><dt>${k}</dt><dd>${typeof v==="string"&&v.startsWith("<code")?v:esc(v)}</dd></div>`).join("");
 }
 function toggleSev(k){ state.sev.has(k)?state.sev.delete(k):state.sev.add(k); state.tab="findings"; renderMeters(); renderTabs(); renderPanel(); }
@@ -614,21 +641,21 @@ function pFindings(r){
     ${SEV.map(k=>`<button class="chip" data-chip="${k}" aria-pressed="${state.sev.has(k)}"><span class="dot" style="background:${SEVC[k]}"></span>${k}</button>`).join("")}
     <label class="toggle"><input type="checkbox" id="hidelib" ${state.hideLib?"checked":""}> Hide library-only findings</label>
     <button class="chip" id="expand-all">Expand all</button>
-  </div><div id="flist">${listHTML()}</div>`;
+  </div><div class="flist" id="flist">${listHTML()}</div>`;
 }
 function listHTML(){
   const items=findingsFiltered();
   if(!state.report.vulnerabilities.length) return `<div class="empty"><b>Nothing found</b>No issues matched our rules. Static analysis can't see code that is downloaded or unpacked at runtime.</div>`;
   if(!items.length) return `<div class="empty"><b>No matches</b>Clear a filter to see more findings.</div>`;
   return items.map(v=>`<details class="finding" style="--c:${SEVC[v.severity]}">
-    <summary><span class="sev">${v.severity}</span><span class="f-title">${esc(v.title)}</span>
-      <span class="f-meta"><span class="tag o" title="${esc(v.owasp_title)}">${v.owasp_id}</span><span class="tag">${esc(v.cwe)}</span><span class="tag" title="Confidence">${v.confidence} confidence</span>${v.in_library?`<span class="tag lib">library</span>`:""}</span></summary>
+    <summary><span class="sev"><i class="dot" style="background:${SEVC[v.severity]}"></i>${v.severity}</span><span class="f-title">${esc(v.title)}</span>
+      <span class="f-meta"><span class="tag o" title="${esc(v.owasp_title)}">${v.owasp_id}</span><span class="tag">${esc(v.cwe)}</span><span class="tag" title="Confidence">${v.confidence.toLowerCase()} conf.</span>${v.in_library?`<span class="tag lib">library</span>`:""}</span></summary>
     <div class="f-body">
       <p>${esc(v.description)}</p>
       ${v.evidence?`<div><h4>Evidence</h4><pre class="code">${esc(v.evidence)}</pre></div>`:""}
       ${(v.locations||[]).length?`<div><h4>Where in the code (${v.locations.length})</h4><pre class="code">${esc(v.locations.slice(0,25).join("\n"))}${v.locations.length>25?"\n…":""}</pre></div>`:""}
       <div><h4>How to fix</h4><pre class="code">${esc(v.remediation)}</pre></div>
-      <div class="refs"><h4>${esc(v.owasp)} · ${esc(v.masvs)} · rule ${esc(v.id)}</h4>${(v.references||[]).map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join("")}</div>
+      <div class="refs"><h4>${esc(v.owasp)}, ${esc(v.masvs)}, rule ${esc(v.id)}</h4>${(v.references||[]).map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join("")}</div>
     </div></details>`).join("");
 }
 function bindFindings(){
@@ -640,12 +667,12 @@ function bindFindings(){
 function pMalware(r){
   const m=r.malware;
   const sig = m.signals.length ? `<ul class="list">${m.signals.map(s=>`<li><span class="w">+${s.weight}</span><span>${esc(s.label)}${(s.evidence||[]).length?`<span class="ev">${esc(s.evidence.join(" | "))}</span>`:""}</span></li>`).join("")}</ul>` : `<p class="sub">No malware patterns were matched.</p>`;
-  const caps = m.capabilities.length ? `<ul class="list">${m.capabilities.map(c=>`<li><span class="w cap">${c.weight||"·"}</span><span>${esc(c.label)}${(c.evidence||[]).length?`<span class="ev">${esc(c.evidence.slice(0,3).join(" | "))}</span>`:""}</span></li>`).join("")}</ul>` : `<p class="sub">No sensitive capabilities detected.</p>`;
+  const caps = m.capabilities.length ? `<ul class="list">${m.capabilities.map(c=>`<li><span class="w cap">${c.weight||"0"}</span><span>${esc(c.label)}${(c.evidence||[]).length?`<span class="ev">${esc(c.evidence.slice(0,3).join(" | "))}</span>`:""}</span></li>`).join("")}</ul>` : `<p class="sub">No sensitive capabilities detected.</p>`;
   return `<div class="grid2">
     <div class="panel"><h3>Signals</h3><p class="sub">Patterns typical of malware families. The number is each signal's weight in the score.</p>${sig}</div>
     <div class="panel"><h3>Capabilities</h3><p class="sub">What the app is able to do. Not bad on its own, but risky in combination.</p>${caps}</div>
   </div>
-  <p class="sub" style="margin-top:18px">${esc(m.note)} Look up this file on <a href="https://www.virustotal.com/gui/file/${esc(r.file_hash_sha256)}" target="_blank" rel="noopener">VirusTotal</a>.</p>
+  <p class="note">${esc(m.note)} Look up this file on <a href="https://www.virustotal.com/gui/file/${esc(r.file_hash_sha256)}" target="_blank" rel="noopener">VirusTotal</a>.</p>
   ${(r.packers||[]).length?`<p>Packer detected: <b>${esc(r.packers.join(", "))}</b>. Static results only cover the unpacking stub.</p>`:""}`;
 }
 function pPerms(r){
@@ -658,14 +685,14 @@ function pPerms(r){
 }
 function pComps(r){
   const cs=r.components||[], sm=r.component_summary||{};
-  const cards=["activity","service","receiver","provider"].map(t=>`<div class="panel"><h3>${t[0].toUpperCase()+t.slice(1)}s</h3><div class="big" style="font-size:56px">${sm[t]?.total||0}</div><p class="sub" style="margin:6px 0 0">${sm[t]?.exported||0} exported</p></div>`).join("");
+  const cards=["activity","service","receiver","provider"].map(t=>`<div class="panel"><h3>${t[0].toUpperCase()+t.slice(1)}s</h3><div class="stat">${sm[t]?.total||0}</div><p class="sub" style="margin:2px 0 0">${sm[t]?.exported||0} exported</p></div>`).join("");
   const rows=cs.slice().sort((a,b)=>(b.exported-a.exported)).map(c=>{
     const prot = c.type==="provider" ? (c.read_permission||c.permission||"") : (c.permission||"");
     const acts=[...new Set((c.filters||[]).flatMap(f=>f.actions))].slice(0,3).join(", ");
-    return `<tr><td>${esc(c.type)}</td><td style="font:12.5px var(--mono)">${esc(c.name)}${c.is_launcher?` <span class="tag">launcher</span>`:""}</td><td>${c.exported?`<b style="color:var(--high)">yes</b><br><span style="color:var(--faint);font-size:12px">${esc(c.exported_reason)}</span>`:"no"}</td><td style="font-size:12.5px">${esc(prot)||"–"}</td><td style="font-size:12.5px;color:var(--muted)">${esc(acts)}</td></tr>`; }).join("");
+    return `<tr><td>${esc(c.type)}</td><td style="font-family:var(--mono);font-size:12.5px">${esc(c.name)}${c.is_launcher?` <span class="tag">launcher</span>`:""}</td><td>${c.exported?`<b style="color:var(--high)">yes</b><br><span style="color:var(--faint);font-size:12px">${esc(c.exported_reason)}</span>`:"no"}</td><td style="font-size:12.5px">${esc(prot)||"–"}</td><td style="font-size:12.5px;color:var(--muted)">${esc(acts)}</td></tr>`; }).join("");
   const links=(r.deep_links||[]);
-  return `<div class="grid2" style="grid-template-columns:repeat(4,minmax(0,1fr))">${cards}</div>
-  ${links.length?`<div class="panel" style="margin-top:22px"><h3>Deep links</h3><p class="sub">URLs that open this app from a browser or another app.</p><ul class="list">${links.map(l=>`<li><span style="font:13px var(--mono)">${esc(l.uri)}</span><span style="color:var(--faint);font-size:13px">${esc(l.component)}${l.verified?" (verified)":""}</span></li>`).join("")}</ul></div>`:""}
+  return `<div class="grid4">${cards}</div>
+  ${links.length?`<div class="panel" style="margin-top:22px"><h3>Deep links</h3><p class="sub">URLs that open this app from a browser or another app.</p><ul class="list">${links.map(l=>`<li><span style="font-family:var(--mono);font-size:13px">${esc(l.uri)}</span><span style="color:var(--faint);font-size:13px">${esc(l.component)}${l.verified?" (verified)":""}</span></li>`).join("")}</ul></div>`:""}
   <div class="tscroll" style="margin-top:22px"><table class="t"><thead><tr><th>Type</th><th>Name</th><th>Exported</th><th>Permission</th><th>Intent actions</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function pNetwork(r){
@@ -673,18 +700,18 @@ function pNetwork(r){
   const nscHTML = nsc ? `<dl class="kv"><dt>File</dt><dd><code>${esc(nsc.file)}</code></dd><dt>Cleartext (global)</dt><dd>${nsc.cleartext_base?"allowed":"not allowed"}</dd><dt>Cleartext domains</dt><dd>${esc((nsc.cleartext_domains||[]).join(", ")||"none")}</dd><dt>User CAs trusted</dt><dd>${nsc.user_ca?"yes":"no"}</dd><dt>Pin-sets</dt><dd>${(nsc.pins||[]).length}</dd></dl>` : `<p class="sub">No network security config. The platform defaults for API ${esc(r.target_sdk)} apply.</p>`;
   return `<div class="panel" style="margin-bottom:22px"><h3>Network security config</h3>${nscHTML}</div>
   ${d.length?`<div class="tscroll"><table class="t"><thead><tr><th>Host</th><th>Schemes</th><th>Refs</th><th>Flags</th><th>Example</th></tr></thead><tbody>
-  ${d.map(x=>`<tr><td><b>${esc(x.host)}</b></td><td>${x.schemes.map(s=>`<span class="tag" style="${/^(http|ws)$/.test(s)?"color:var(--high);border-color:var(--high)":""}">${esc(s)}</span>`).join(" ")}</td><td>${x.count}</td><td>${x.flags.map(f=>`<span class="tag" style="color:var(--crit);border-color:var(--crit)">${esc(f)}</span>`).join(" ")}</td><td style="font:12px var(--mono);color:var(--muted)">${esc((x.samples||[])[0]||"")}</td></tr>`).join("")}
+  ${d.map(x=>`<tr><td><b>${esc(x.host)}</b></td><td>${x.schemes.map(s=>`<span class="tag" style="${/^(http|ws)$/.test(s)?"color:var(--high);border-color:var(--high)":""}">${esc(s)}</span>`).join(" ")}</td><td>${x.count}</td><td>${x.flags.map(f=>`<span class="tag" style="color:var(--crit);border-color:var(--crit)">${esc(f)}</span>`).join(" ")}</td><td style="font-family:var(--mono);font-size:12px;color:var(--muted)">${esc((x.samples||[])[0]||"")}</td></tr>`).join("")}
   </tbody></table></div>`:`<div class="empty"><b>No endpoints</b>No URLs were found in code or resources.</div>`}`;
 }
 function pSecrets(r){
   const s=r.secrets||[]; if(!s.length) return `<div class="empty"><b>No secrets found</b>None of the 30+ known key formats appeared in code, resources or assets.</div>`;
   return `<p class="sub">Values are masked. Rotate anything real, since everything inside an APK is public.</p><div class="tscroll"><table class="t"><thead><tr><th>Severity</th><th>Type</th><th>Value</th><th>Found in</th></tr></thead><tbody>
-  ${s.map(x=>`<tr><td><span class="sev" style="--c:${SEVC[x.severity]};color:${SEVC[x.severity]}">${esc(x.severity)}</span></td><td>${esc(x.type)}</td><td style="font:12.5px var(--mono)">${esc(x.value)}</td><td style="font-size:13px;color:var(--muted)">${esc((x.sources||[]).join(", "))}</td></tr>`).join("")}
+  ${s.map(x=>`<tr><td><span class="sev" style="--c:${SEVC[x.severity]}">${esc(x.severity)}</span></td><td>${esc(x.type)}</td><td style="font-family:var(--mono);font-size:12.5px">${esc(x.value)}</td><td style="font-size:13px;color:var(--muted)">${esc((x.sources||[]).join(", "))}</td></tr>`).join("")}
   </tbody></table></div>`;
 }
 function pSigning(r){
   const s=r.signing||{}, c=(s.certificates||[])[0];
-  const schemes=["v1","v2","v3","v4"].map(v=>`<span class="scheme"><span class="dot" style="background:${s[v]?"var(--ok)":"rgba(147,167,214,.3)"}"></span>${v} ${s[v]?"signed":"absent"}</span>`).join("");
+  const schemes=["v1","v2","v3","v4"].map(v=>`<span class="scheme"><span class="dot" style="background:${s[v]?"var(--ok)":"var(--line3)"}"></span>${v} ${s[v]?"signed":"absent"}</span>`).join("");
   return `<div class="panel"><h3>Signature schemes</h3><p style="margin:10px 0 18px">${schemes}</p>
   ${c?`<dl class="kv"><dt>Subject</dt><dd>${esc(c.subject)}</dd><dt>Issuer</dt><dd>${esc(c.issuer)}${c.self_signed?" (self-signed)":""}</dd><dt>Valid</dt><dd>${esc((c.not_before||"").slice(0,10))} to ${esc((c.not_after||"").slice(0,10))}${c.expired?` <b style="color:var(--crit)">expired</b>`:""}</dd><dt>Public key</dt><dd>${esc(c.public_key)}</dd><dt>Signature hash</dt><dd>${esc(c.signature_algorithm)}</dd><dt>Serial</dt><dd><code>${esc(c.serial)}</code></dd><dt>SHA-256</dt><dd><code>${esc(c.sha256)}</code></dd><dt>SHA-1</dt><dd><code>${esc(c.sha1)}</code></dd></dl>`:`<p class="sub">No certificate could be read.</p>`}</div>
   <div class="panel" style="margin-top:22px"><h3>File hashes</h3><dl class="kv"><dt>MD5</dt><dd><code>${esc(r.hashes?.md5)}</code></dd><dt>SHA-1</dt><dd><code>${esc(r.hashes?.sha1)}</code></dd><dt>SHA-256</dt><dd><code>${esc(r.hashes?.sha256)}</code></dd></dl></div>`;
@@ -695,24 +722,24 @@ function pSdk(r){
   const allCtrl=Object.keys(CONTROL_LABEL);
   return `<div class="grid2">
     <div class="panel"><h3>Defences detected</h3><p class="sub">Protections found in the code. More is better for apps handling money or personal data.</p>
-      ${allCtrl.map(k=>{const on=ctrl.find(c=>c.key===k); return `<span class="pill ${on?"on":""}" title="${esc(on?on.evidence.join("; "):"not found")}">${on?"✓ ":""}${CONTROL_LABEL[k]}</span>`;}).join("")}
+      ${allCtrl.map(k=>{const on=ctrl.find(c=>c.key===k); return `<span class="pill ${on?"on":""}" title="${esc(on?on.evidence.join("; "):"not found")}">${on?"✓":"–"} ${CONTROL_LABEL[k]}</span>`;}).join("")}
       ${ob&&ob.ratio!==null?`<p class="sub" style="margin-top:14px">Obfuscation: ${Math.round(ob.ratio*100)}% of ${ob.app_classes} app classes have minified names.</p>`:""}
     </div>
     <div class="panel"><h3>Trackers</h3><p class="sub">Third-party SDKs that collect analytics, ads or profiling data.</p>
       ${tr.length?`<ul class="list">${tr.map(t=>`<li><b>${esc(t.name)}</b><span style="color:var(--muted)">${esc(t.category)}</span></li>`).join("")}</ul>`:`<p>No known trackers found.</p>`}
     </div>
     <div class="panel"><h3>Built with</h3><p>${(r.frameworks||[]).map(f=>`<span class="pill">${esc(f)}</span>`).join("")}</p>
-      ${(r.packers||[]).length?`<p><b style="color:var(--high)">Packer:</b> ${esc(r.packers.join(", "))}</p>`:""}
-      ${(r.payloads||[]).length?`<p><b style="color:var(--crit)">Hidden payloads:</b><br>${r.payloads.map(p=>`<code style="font:12px var(--mono)">${esc(p.path)}</code> ${esc(p.kind)}`).join("<br>")}</p>`:""}</div>
+      ${(r.packers||[]).length?`<p style="margin:10px 0 0"><b style="color:var(--high)">Packer:</b> ${esc(r.packers.join(", "))}</p>`:""}
+      ${(r.payloads||[]).length?`<p><b style="color:var(--crit)">Hidden payloads:</b><br>${r.payloads.map(p=>`<code style="font-size:12px">${esc(p.path)}</code> ${esc(p.kind)}`).join("<br>")}</p>`:""}</div>
     <div class="panel"><h3>Native libraries</h3><p class="sub">${nat.count||0} libraries${(nat.abis||[]).length?` for ${esc(nat.abis.join(", "))}`:""}</p>
       ${(nat.libraries||[]).length?`<pre class="code">${esc(nat.libraries.join("\n"))}</pre>`:""}</div>
   </div>`;
 }
 function pOwasp(r){
   return `<div class="tscroll"><table class="t"><thead><tr><th>Risk</th><th>What it covers</th><th>Findings</th></tr></thead><tbody>
-  ${Object.values(r.owasp).map(o=>`<tr><td><b style="font:800 20px var(--display);color:${o.count?SEVHEX[o.worst]:"var(--ok)"}">${o.id}</b> <a href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.title)}</a></td><td style="color:var(--muted)">${esc(o.summary)}</td><td>${o.count?`<button class="link" data-goto="${o.id}">${o.count}, worst ${esc(o.worst)}</button>`:`<span style="color:var(--ok)">clear</span>`}</td></tr>`).join("")}
+  ${Object.values(r.owasp).map(o=>`<tr><td><span class="sev" style="--c:${o.count?SEVHEX[o.worst]:"var(--ok)"};margin-right:8px">${o.id}</span> <a href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.title)}</a></td><td style="color:var(--muted)">${esc(o.summary)}</td><td>${o.count?`<button class="link" data-goto="${o.id}">${o.count}, worst ${esc(o.worst)}</button>`:`<span style="color:var(--ok)">clear</span>`}</td></tr>`).join("")}
   </tbody></table></div>
-  <h3 style="font:800 24px var(--display);margin:28px 0 10px">MASVS control groups</h3>
+  <h3 style="font-size:14px;font-weight:500;color:var(--muted);margin:28px 0 10px">MASVS control groups</h3>
   <div class="tscroll"><table class="t"><tbody>${Object.values(r.masvs).map(m=>`<tr><td><b>${esc(m.id)}</b></td><td style="color:var(--muted)">${esc(m.title)}</td><td>${m.count}</td></tr>`).join("")}</tbody></table></div>`;
 }
 document.addEventListener("click", e=>{ const g=e.target.closest("[data-goto]"); if(g){ state.owasp=g.dataset.goto; state.tab="findings"; renderRing(); renderTabs(); renderPanel(); $("#tabs").scrollIntoView({behavior:reduceMotion?"auto":"smooth"}); } });
@@ -737,7 +764,7 @@ function saveHistory(rep){
 }
 function renderHistory(){
   const h=loadHistory(); $("#history").hidden=!h.length;
-  $("#hist-list").innerHTML=h.map(x=>`<button class="hist" data-sha="${esc(x.sha)}"><span class="g" style="color:${{A:"var(--ok)",B:"var(--low)",C:"var(--med)",D:"var(--high)",F:"var(--crit)"}[x.grade]}">${esc(x.grade)}</span><span style="text-align:left"><b>${esc(x.name)}</b><small>${esc(x.pkg)}</small><small>${esc(x.mal)}, ${new Date(x.at).toLocaleDateString()}</small></span></button>`).join("");
+  $("#hist-list").innerHTML=h.map(x=>`<button class="hist" data-sha="${esc(x.sha)}"><span class="g" style="color:${GRADEC[x.grade]}">${esc(x.grade)}</span><span><b>${esc(x.name)}</b><small>${esc(x.pkg)}</small><small>${esc(x.mal)}, ${new Date(x.at).toLocaleDateString()}</small></span></button>`).join("");
   document.querySelectorAll(".hist").forEach(b=>b.onclick=()=>{ let rep=null; try{ rep=JSON.parse(localStorage.getItem("xray_report_"+b.dataset.sha)); }catch{}
     if(rep){ state.jobId=null; showReport(rep, false); } else toast("That report is no longer stored in this browser. Scan the file again.", true); });
 }
