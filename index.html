@@ -115,7 +115,8 @@ body.has-pointer .lens{opacity:.4}
 .seg{transition:fill .5s, opacity .5s;cursor:default}
 .seg.clickable{cursor:pointer}
 .seg.clickable:hover{filter:brightness(1.15)}
-.seg.dim{opacity:.18}
+.seg.dim{opacity:.38}
+.seg.sel{stroke:#E8ECF2;stroke-width:2}
 .stage-arc{fill:rgba(255,255,255,.06);transition:fill .45s}
 .stage-arc.on{fill:var(--accent)}
 .stage-arc.run{fill:rgba(103,232,249,.5);animation:pulse 1s ease-in-out infinite}
@@ -149,14 +150,28 @@ body.has-pointer .lens{opacity:.4}
 .app-id .pkg code{font-size:13px;color:var(--text)}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 
-.r-top{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:56px;align-items:center}
+.r-top{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:56px;align-items:start}
 .ring-col{display:flex;flex-direction:column;align-items:center;gap:4px}
-.ring-legend{font-size:13px;color:var(--faint);text-align:center;min-height:22px}
+.ring-legend{font-size:13px;color:var(--faint);text-align:center;min-height:44px}
 .sheet{border:1px solid var(--line);border-radius:var(--r);background:var(--bg2);overflow:hidden}
 .sheet>section{padding:22px 24px;border-bottom:1px solid var(--line)}
 .sheet>section:last-child{border-bottom:none}
 .sheet-row{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
 .lbl .aside{font-size:12.5px;color:var(--faint)}
+.explain{margin-top:14px;font-size:13px;color:var(--muted)}
+.explain summary{cursor:pointer;color:var(--accent);font-weight:500;list-style:none;display:inline-flex;align-items:center;gap:6px}
+.explain summary::-webkit-details-marker{display:none}
+.explain summary::before{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .2s}
+.explain[open] summary::before{transform:rotate(45deg)}
+.explain>div{margin-top:12px;line-height:1.6}
+.explain p{margin:0 0 10px}
+.xt{width:100%;border-collapse:collapse;margin:4px 0 10px;font-size:12.5px}
+.xt td{padding:5px 0;border-bottom:1px solid var(--line)}
+.xt td:last-child{text-align:right;color:var(--text);font-variant-numeric:tabular-nums}
+.xt tr.cur td{color:var(--text);font-weight:600}
+.xt tr.total td{border-bottom:none;color:var(--text);font-weight:600}
+.ring-legend{max-width:420px;line-height:1.55}
+.ring-legend b{display:block;color:var(--text);font-weight:500;font-size:13.5px;margin-bottom:2px}
 .sheet-row>div{padding:22px 24px}
 .sheet-row>div+div{border-left:1px solid var(--line)}
 .lbl{font-size:13px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -410,12 +425,14 @@ footer{color:var(--faint);font-size:12.5px;padding:26px 0 40px;border-top:1px so
             <p class="lbl"><span>Security score</span><span class="gpill" id="grade-pill"></span></p>
             <div class="score-line"><span class="score-num" id="score-big">0</span><span class="score-of">out of 100</span></div>
             <div class="hint" id="score-sub"></div>
+            <details class="explain"><summary>How is this calculated?</summary><div id="score-explain"></div></details>
           </div>
           <div>
             <p class="lbl"><span>Malware risk</span><span class="aside" id="mal-score"></span></p>
             <div class="verdict" id="mal-verdict"></div>
             <div class="scale" aria-hidden="true"><span class="scale-pin" id="mal-pin"></span></div>
             <div class="scale-lab"><span>Clean</span><span>Low</span><span>Suspicious</span><span>Malicious</span></div>
+            <details class="explain"><summary>How is this calculated?</summary><div id="mal-explain"></div></details>
           </div>
         </div>
         <section>
@@ -490,6 +507,7 @@ function ringSVG(mode, report){
       const o=report.owasp[id]; has=o.count>0;
       if(has){ fill=SEVHEX[o.worst]; extra=Math.min(10, 2+o.count*2); cls+=" clickable"; } else { fill="rgba(52,211,153,.18)"; }
       if(state.owasp && state.owasp!==id) cls+=" dim";
+      if(state.owasp===id) cls+=" sel";
     }
     s+=`<path class="${cls}" data-owasp="${id}" d="${arc(C,C,R1,R2+extra,a0,a1)}" fill="${fill}" style="${mode==='report'&&!reduceMotion&&state.animateRing?`opacity:0;transition-delay:${i*60}ms`:''}"><title>${id} ${OWASP_SHORT[id]}${mode==='report'?`: ${report.owasp[id].count} finding(s)`:''}</title></path>`;
     s+=`<text x="${px(288,mid)}" y="${py(288,mid)+5}" text-anchor="middle" font-family="Geist, sans-serif" font-weight="500" font-size="15" fill="${has?'#E8ECF2':'#5B6577'}">${id}</text>`;
@@ -499,9 +517,11 @@ function ringSVG(mode, report){
   s+=`<path class="sweep" d="${arc(C,C,60,200,0,46)}" fill="url(#sw)"/>`;
   s+=`<circle cx="300" cy="300" r="166" fill="#0A0D13" stroke="rgba(255,255,255,.07)"/>`;
   if(mode==="report"){
-    const g=report.security.grade;
-    s+=`<text x="300" y="338" text-anchor="middle" font-family="Geist, sans-serif" font-size="128" font-weight="600" letter-spacing="-6" fill="${GRADEC[g]}">${g}</text>
-        <text x="300" y="382" text-anchor="middle" font-family="Geist, sans-serif" font-size="15" font-weight="500" fill="#5B6577">Security grade</text>`;
+    const tot=report.summary.total, hit=Object.values(report.owasp).filter(o=>o.count).length;
+    const sel=state.owasp?report.owasp[state.owasp]:null;
+    s+=`<text x="300" y="322" text-anchor="middle" font-family="Geist, sans-serif" font-size="92" font-weight="600" letter-spacing="-4" fill="#E8ECF2">${sel?sel.count:tot}</text>
+        <text x="300" y="358" text-anchor="middle" font-family="Geist, sans-serif" font-size="16" font-weight="500" fill="#8B95A7">${sel?`findings in ${sel.id}`:`findings`}</text>
+        <text x="300" y="382" text-anchor="middle" font-family="Geist, sans-serif" font-size="13.5" font-weight="400" fill="#5B6577">${sel?esc(OWASP_SHORT[sel.id]):`across ${hit} of 10 OWASP risks`}</text>`;
   } else {
     s+=`<text x="300" y="${mode==='scan'?322:318}" text-anchor="middle" font-family="Geist, sans-serif" font-size="${mode==='scan'?76:58}" font-weight="600" letter-spacing="-3" fill="#E8ECF2" id="${mode}-center">${mode==='scan'?'0%':'APK'}</text>
         <text x="300" y="358" text-anchor="middle" font-family="Geist, sans-serif" font-size="15" font-weight="500" fill="#5B6577" id="${mode}-caption">${mode==='scan'?'uploading':'waiting for a file'}</text>`;
@@ -602,8 +622,8 @@ function renderRing(){
   document.querySelectorAll("#ring-report .seg.clickable").forEach(el=>el.addEventListener("click",()=>{
     const id=el.dataset.owasp; state.owasp = state.owasp===id ? null : id; state.tab="findings"; renderRing(); renderTabs(); renderPanel(); }));
   $("#ring-legend").innerHTML = state.owasp
-    ? `Showing ${esc(state.owasp)}: ${esc(rep.owasp[state.owasp].title)} <button class="link accent" id="clear-owasp">Show all</button>`
-    : `OWASP Mobile Top 10. Click a segment to filter.`;
+    ? `<b>Filtered to ${esc(state.owasp)}: ${esc(rep.owasp[state.owasp].title)}</b><button class="link accent" id="clear-owasp">Show all findings</button>`
+    : `<b>OWASP Mobile Top 10 (2024)</b>Each segment is one risk category (M1 to M10). Its color is the most severe finding in it, the number is how many findings it has. Dark green means nothing was found. Click a segment to see its findings.`;
   const c=$("#clear-owasp"); if(c) c.onclick=()=>{ state.owasp=null; renderRing(); renderPanel(); };
 }
 function countUp(el, to, suffix){
@@ -613,8 +633,19 @@ function countUp(el, to, suffix){
 function renderMeters(){
   const r=state.report, s=r.summary, sec=r.security, m=r.malware;
   countUp($("#score-big"), sec.score, "");
-  const gp=$("#grade-pill"); gp.textContent="Grade "+sec.grade; gp.style.setProperty("--c", GRADEC[sec.grade]);
-  $("#score-sub").textContent = sec.score>=85 ? "Solid. Only minor issues were found." : sec.score>=55 ? "Some issues are worth fixing before release." : "Serious weaknesses. Start with the critical and high findings.";
+  const gp=$("#grade-pill"); gp.textContent="Grade "+sec.grade; gp.title="A is best, F is worst. See How is this calculated?"; gp.style.setProperty("--c", GRADEC[sec.grade]);
+  $("#score-sub").textContent = (sec.score>=85 ? "Solid. Only minor issues were found." : sec.score>=55 ? "Some issues are worth fixing before release." : "Serious weaknesses. Start with the critical and high findings.") + " Higher is better; grades go from A (best) to F.";
+  const W={Critical:26,High:11,Medium:4,Low:1,Info:0}, CF={High:1,Medium:.7,Low:.4};
+  const pen={}; r.vulnerabilities.forEach(v=>{ pen[v.severity]=(pen[v.severity]||0)+W[v.severity]*(CF[v.confidence]??.7); });
+  const bands=[["A","85 to 100"],["B","70 to 84"],["C","55 to 69"],["D","40 to 54"],["F","below 40"]];
+  $("#score-explain").innerHTML = `<p>Every app starts at 100. Each finding takes points off by severity: Critical 26, High 11, Medium 4, Low 1, Info 0. Findings with medium confidence count 70%, low confidence 40%. The total penalty is converted with score = 100 × e<sup>−penalty/90</sup>, so the score never goes below 0.</p>
+    <table class="xt">${SEV.filter(k=>s[k.toLowerCase()]).map(k=>`<tr><td>${s[k.toLowerCase()]} ${k}</td><td>−${(pen[k]||0).toFixed(1)}</td></tr>`).join("")}<tr class="total"><td>Total penalty ${sec.penalty} → score</td><td>${sec.score}</td></tr></table>
+    <table class="xt">${bands.map(([g,b])=>`<tr class="${g===sec.grade?"cur":""}"><td>Grade ${g}</td><td>${b}</td></tr>`).join("")}</table>`;
+  const sigSum=m.signals.reduce((a,x)=>a+x.weight,0), capSum=m.capabilities.reduce((a,x)=>a+(x.weight||0),0);
+  $("#mal-explain").innerHTML = `<p>Adds up the weights of malware-like signals (for example a hidden launcher icon +10, SMS interception +14, packed code +12) plus 45% of the weights of sensitive capabilities, such as recording audio or loading code at runtime. Capabilities count less because normal apps use them too.</p>
+    <table class="xt"><tr><td>Signals (${m.signals.length})</td><td>+${sigSum}</td></tr><tr><td>Capabilities (${m.capabilities.length}) × 0.45</td><td>+${(capSum*.45).toFixed(1)}</td></tr><tr class="total"><td>Malware risk</td><td>${m.score}</td></tr></table>
+    <table class="xt">${[["clean","No malware indicators","0 to 14"],["low","Low risk","15 to 34"],["suspicious","Suspicious","35 to 59"],["malicious","Likely malicious","60 to 100"]].map(([k,l,b])=>`<tr class="${k===m.verdict?"cur":""}"><td>${l}</td><td>${b}</td></tr>`).join("")}</table>
+    <p>The full list of signals and capabilities is in the Malware tab.</p>`;
   const mc={clean:"var(--ok)",low:"var(--low)",suspicious:"var(--med)",malicious:"var(--crit)"}[m.verdict];
   $("#mal-verdict").innerHTML = `<i class="dot" style="background:${mc}"></i>${esc(m.label)}`;
   $("#mal-score").textContent = `${m.score} out of 100`;
