@@ -150,56 +150,27 @@ body.has-pointer .lens{opacity:.4}
 .app-id .pkg code{font-size:13px;color:var(--text)}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 
-.r-top{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:56px;align-items:start}
-.ring-col{display:flex;flex-direction:column;align-items:center;gap:4px}
-.ring-legend{font-size:13px;color:var(--faint);text-align:center;min-height:44px}
-.sheet{border:1px solid var(--line);border-radius:var(--r);background:var(--bg2);overflow:hidden}
-.sheet>section{padding:22px 24px;border-bottom:1px solid var(--line)}
-.sheet>section:last-child{border-bottom:none}
-.sheet-row{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
+.summary{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);border:1px solid var(--line);border-radius:var(--r);background:var(--bg2);overflow:hidden}
+.summary>div{padding:22px 24px}
+.sum-mal{border-left:1px solid var(--line)}
+.summary .facts{grid-column:1/-1;border-top:1px solid var(--line);padding:18px 24px}
+.lbl{font-size:13px;color:var(--muted);margin:0 0 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .lbl .aside{font-size:12.5px;color:var(--faint)}
-.explain{margin-top:14px;font-size:13px;color:var(--muted)}
-.explain summary{cursor:pointer;color:var(--accent);font-weight:500;list-style:none;display:inline-flex;align-items:center;gap:6px}
-.explain summary::-webkit-details-marker{display:none}
-.explain summary::before{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .2s}
-.explain[open] summary::before{transform:rotate(45deg)}
-.explain>div{margin-top:12px;line-height:1.6}
-.explain p{margin:0 0 10px}
-.xt{width:100%;border-collapse:collapse;margin:4px 0 10px;font-size:12.5px}
-.xt td{padding:5px 0;border-bottom:1px solid var(--line)}
-.xt td:last-child{text-align:right;color:var(--text);font-variant-numeric:tabular-nums}
-.xt tr.cur td{color:var(--text);font-weight:600}
-.xt tr.total td{border-bottom:none;color:var(--text);font-weight:600}
-.ring-legend{max-width:420px;line-height:1.55}
-.ring-legend b{display:block;color:var(--text);font-weight:500;font-size:13.5px;margin-bottom:2px}
-.sheet-row>div{padding:22px 24px}
-.sheet-row>div+div{border-left:1px solid var(--line)}
-.lbl{font-size:13px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.score-line{display:flex;align-items:baseline;gap:10px}
-.score-num{font-weight:600;font-size:44px;line-height:1;letter-spacing:-.045em;color:var(--text)}
-.score-of{font-size:15px;color:var(--faint)}
-.gpill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);border:1px solid color-mix(in srgb,var(--c) 30%,transparent)}
-.hint{font-size:13px;color:var(--faint);margin-top:10px;line-height:1.5}
-.verdict{display:flex;align-items:center;gap:9px;font-weight:500;font-size:17px;letter-spacing:-.01em;color:var(--text);line-height:1.25}
-.verdict .dot{width:9px;height:9px;flex-basis:9px}
-.scale{position:relative;height:4px;margin:20px 0 8px;border-radius:4px;
-  background:linear-gradient(90deg,var(--ok) 0 15%,var(--low) 15% 35%,var(--med) 35% 60%,var(--crit) 60% 100%);opacity:.75}
-.scale-pin{position:absolute;top:-6px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--text);border:3px solid var(--bg2);transition:left 1.2s cubic-bezier(.2,.8,.2,1);left:0}
-.scale-lab{display:flex;justify-content:space-between;font-size:11.5px;color:var(--faint)}
-.sevbar{display:flex;height:6px;margin:0 0 16px;gap:2px;border-radius:6px;overflow:hidden;background:var(--line)}
-.sevbar i{display:block;height:100%}
+.hint{font-size:13px;color:var(--faint);margin:8px 0 0;line-height:1.5}
+.verdict{display:flex;align-items:center;gap:10px;font-weight:500;font-size:18px;letter-spacing:-.01em;color:var(--text);line-height:1.3}
+.verdict .dot{width:10px;height:10px;flex-basis:10px}
 .sevcounts{display:flex;flex-wrap:wrap;gap:4px}
 .sevcounts button{flex:1 1 0;min-width:76px;background:none;border:1px solid transparent;border-radius:var(--r-sm);padding:8px 10px;cursor:pointer;text-align:left;transition:background .15s,border-color .15s}
 .sevcounts button:hover{background:var(--panel)}
 .sevcounts button.active{background:var(--panel2);border-color:var(--line2)}
-.sevcounts b{display:block;font-weight:600;font-size:22px;letter-spacing:-.03em;line-height:1.15;color:var(--text)}
+.sevcounts b{display:block;font-weight:600;font-size:28px;letter-spacing:-.03em;line-height:1.15;color:var(--text)}
 .sevcounts button.zero b{color:var(--faint)}
 .sevcounts span{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
 .dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex:0 0 7px}
-.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px;margin:0}
-.facts div{display:flex;justify-content:space-between;gap:14px;font-size:13.5px;padding:2px 0;min-width:0}
-.facts dt{color:var(--faint);white-space:nowrap}
-.facts dd{margin:0;color:var(--text);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 28px;margin:0}
+.facts div{display:flex;flex-direction:column;gap:2px;font-size:13.5px;min-width:0}
+.facts dt{color:var(--faint);font-size:12.5px}
+.facts dd{margin:0;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .panel{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:22px}
 .panel h3{font-size:14px;font-weight:500;color:var(--muted);margin:0 0 2px}
 .panel .sub{color:var(--faint);font-size:13px;margin:0 0 14px;line-height:1.5}
@@ -299,7 +270,9 @@ footer{color:var(--faint);font-size:12.5px;padding:26px 0 40px;border-top:1px so
   .ring-box{max-width:400px}
   .checks{grid-template-columns:repeat(2,1fr)}
   .checks div{border-bottom:1px solid var(--line)}
-  .r-top{gap:28px}
+  .summary{grid-template-columns:1fr}
+  .sum-mal{border-left:none;border-top:1px solid var(--line)}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
   .grid2,.meter-row{grid-template-columns:1fr}
   .grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
@@ -312,9 +285,7 @@ footer{color:var(--faint);font-size:12.5px;padding:26px 0 40px;border-top:1px so
   .finding>summary .f-meta{grid-column:1}
   .finding>summary::after{grid-column:2;grid-row:1/4}
   .f-body{padding:10px 16px 20px}
-  .sheet-row{grid-template-columns:1fr}
-  .sheet-row>div+div{border-left:none;border-top:1px solid var(--line)}
-  .facts{grid-template-columns:1fr}
+
   .brand span{display:none}
   .kv{grid-template-columns:1fr}
   .checks{grid-template-columns:1fr}
@@ -374,7 +345,7 @@ footer{color:var(--faint);font-size:12.5px;padding:26px 0 40px;border-top:1px so
       <div><b>M1 to M10</b><span>Mapped to OWASP 2024, MASVS and CWE</span></div>
       <div><b>Signatures</b><span>v1 to v4 schemes, debug keys and Janus</span></div>
       <div><b>30+ secrets</b><span>AWS, GCP, Stripe, GitHub, Telegram, OpenAI and more</span></div>
-      <div><b>Malware risk</b><span>0 to 100 score from capabilities and known patterns</span></div>
+      <div><b>Malware check</b><span>Flags SMS theft, hidden payloads, overlays and other malware behaviour</span></div>
     </section>
 
     <section class="history" id="history" hidden>
@@ -414,36 +385,17 @@ footer{color:var(--faint);font-size:12.5px;padding:26px 0 40px;border-top:1px so
       </div>
     </section>
 
-    <section class="r-top">
-      <div class="ring-col">
-        <div class="ring-box" id="ring-report"></div>
-        <div class="ring-legend" id="ring-legend"></div>
+    <section class="summary">
+      <div class="sum-counts">
+        <p class="lbl"><span id="sev-title">Findings</span><span class="aside">Click a level to filter the list</span></p>
+        <div class="sevcounts" id="sevcounts"></div>
       </div>
-      <div class="sheet">
-        <div class="sheet-row">
-          <div>
-            <p class="lbl"><span>Security score</span><span class="gpill" id="grade-pill"></span></p>
-            <div class="score-line"><span class="score-num" id="score-big">0</span><span class="score-of">out of 100</span></div>
-            <div class="hint" id="score-sub"></div>
-            <details class="explain"><summary>How is this calculated?</summary><div id="score-explain"></div></details>
-          </div>
-          <div>
-            <p class="lbl"><span>Malware risk</span><span class="aside" id="mal-score"></span></p>
-            <div class="verdict" id="mal-verdict"></div>
-            <div class="scale" aria-hidden="true"><span class="scale-pin" id="mal-pin"></span></div>
-            <div class="scale-lab"><span>Clean</span><span>Low</span><span>Suspicious</span><span>Malicious</span></div>
-            <details class="explain"><summary>How is this calculated?</summary><div id="mal-explain"></div></details>
-          </div>
-        </div>
-        <section>
-          <p class="lbl"><span id="sev-title">Findings</span><span class="aside">Click a level to filter</span></p>
-          <div class="sevbar" id="sevbar"></div>
-          <div class="sevcounts" id="sevcounts"></div>
-        </section>
-        <section>
-          <dl class="facts" id="facts"></dl>
-        </section>
+      <div class="sum-mal">
+        <p class="lbl"><span>Malware check</span></p>
+        <div class="verdict" id="mal-verdict"></div>
+        <p class="hint" id="mal-sub"></p>
       </div>
+      <dl class="facts" id="facts"></dl>
     </section>
 
     <div class="tabs" role="tablist" id="tabs"></div>
@@ -614,51 +566,27 @@ function showReport(rep, isDemo){
   $("#r-name").textContent = rep.app_name || rep.package_name;
   $("#r-pkg").innerHTML = `<code>${esc(rep.package_name)}</code><span>Version ${esc(rep.version_name||"?")} (${esc(rep.version_code)})</span><span>SHA-256 <code style="color:var(--muted)">${esc((rep.file_hash_sha256||"").slice(0,12))}…</code></span>${isDemo?`<span style="color:var(--accent)">Sample report of the deliberately vulnerable InsecureShop app</span>`:""}`;
   $("#exp-sarif").style.display = state.jobId ? "" : "none";
-  state.animateRing=true; renderRing(); state.animateRing=false; renderMeters(); renderTabs(); renderPanel();
-}
-function renderRing(){
-  const rep=state.report; $("#ring-report").innerHTML=ringSVG("report", rep);
-  requestAnimationFrame(()=>document.querySelectorAll("#ring-report .seg").forEach(el=>el.style.opacity=""));
-  document.querySelectorAll("#ring-report .seg.clickable").forEach(el=>el.addEventListener("click",()=>{
-    const id=el.dataset.owasp; state.owasp = state.owasp===id ? null : id; state.tab="findings"; renderRing(); renderTabs(); renderPanel(); }));
-  $("#ring-legend").innerHTML = state.owasp
-    ? `<b>Filtered to ${esc(state.owasp)}: ${esc(rep.owasp[state.owasp].title)}</b><button class="link accent" id="clear-owasp">Show all findings</button>`
-    : `<b>OWASP Mobile Top 10 (2024)</b>Each segment is one risk category (M1 to M10). Its color is the most severe finding in it, the number is how many findings it has. Dark green means nothing was found. Click a segment to see its findings.`;
-  const c=$("#clear-owasp"); if(c) c.onclick=()=>{ state.owasp=null; renderRing(); renderPanel(); };
+  renderMeters(); renderTabs(); renderPanel();
 }
 function countUp(el, to, suffix){
   if(reduceMotion){ el.innerHTML=to+suffix; return; }
   const t0=performance.now(), d=1100; (function f(t){ const k=Math.min(1,(t-t0)/d), v=Math.round(to*(1-Math.pow(1-k,3))); el.innerHTML=v+suffix; if(k<1) requestAnimationFrame(f); })(t0);
 }
 function renderMeters(){
-  const r=state.report, s=r.summary, sec=r.security, m=r.malware;
-  countUp($("#score-big"), sec.score, "");
-  const gp=$("#grade-pill"); gp.textContent="Grade "+sec.grade; gp.title="A is best, F is worst. See How is this calculated?"; gp.style.setProperty("--c", GRADEC[sec.grade]);
-  $("#score-sub").textContent = (sec.score>=85 ? "Solid. Only minor issues were found." : sec.score>=55 ? "Some issues are worth fixing before release." : "Serious weaknesses. Start with the critical and high findings.") + " Higher is better; grades go from A (best) to F.";
-  const W={Critical:26,High:11,Medium:4,Low:1,Info:0}, CF={High:1,Medium:.7,Low:.4};
-  const pen={}; r.vulnerabilities.forEach(v=>{ pen[v.severity]=(pen[v.severity]||0)+W[v.severity]*(CF[v.confidence]??.7); });
-  const bands=[["A","85 to 100"],["B","70 to 84"],["C","55 to 69"],["D","40 to 54"],["F","below 40"]];
-  $("#score-explain").innerHTML = `<p>Every app starts at 100. Each finding takes points off by severity: Critical 26, High 11, Medium 4, Low 1, Info 0. Findings with medium confidence count 70%, low confidence 40%. The total penalty is converted with score = 100 × e<sup>−penalty/90</sup>, so the score never goes below 0.</p>
-    <table class="xt">${SEV.filter(k=>s[k.toLowerCase()]).map(k=>`<tr><td>${s[k.toLowerCase()]} ${k}</td><td>−${(pen[k]||0).toFixed(1)}</td></tr>`).join("")}<tr class="total"><td>Total penalty ${sec.penalty} → score</td><td>${sec.score}</td></tr></table>
-    <table class="xt">${bands.map(([g,b])=>`<tr class="${g===sec.grade?"cur":""}"><td>Grade ${g}</td><td>${b}</td></tr>`).join("")}</table>`;
-  const sigSum=m.signals.reduce((a,x)=>a+x.weight,0), capSum=m.capabilities.reduce((a,x)=>a+(x.weight||0),0);
-  $("#mal-explain").innerHTML = `<p>Adds up the weights of malware-like signals (for example a hidden launcher icon +10, SMS interception +14, packed code +12) plus 45% of the weights of sensitive capabilities, such as recording audio or loading code at runtime. Capabilities count less because normal apps use them too.</p>
-    <table class="xt"><tr><td>Signals (${m.signals.length})</td><td>+${sigSum}</td></tr><tr><td>Capabilities (${m.capabilities.length}) × 0.45</td><td>+${(capSum*.45).toFixed(1)}</td></tr><tr class="total"><td>Malware risk</td><td>${m.score}</td></tr></table>
-    <table class="xt">${[["clean","No malware indicators","0 to 14"],["low","Low risk","15 to 34"],["suspicious","Suspicious","35 to 59"],["malicious","Likely malicious","60 to 100"]].map(([k,l,b])=>`<tr class="${k===m.verdict?"cur":""}"><td>${l}</td><td>${b}</td></tr>`).join("")}</table>
-    <p>The full list of signals and capabilities is in the Malware tab.</p>`;
-  const mc={clean:"var(--ok)",low:"var(--low)",suspicious:"var(--med)",malicious:"var(--crit)"}[m.verdict];
-  $("#mal-verdict").innerHTML = `<i class="dot" style="background:${mc}"></i>${esc(m.label)}`;
-  $("#mal-score").textContent = `${m.score} out of 100`;
-  setTimeout(()=>$("#mal-pin").style.left=`${Math.max(1,Math.min(99,m.score))}%`, 60);
+  const r=state.report, s=r.summary, m=r.malware;
+  const mv={clean:["var(--ok)","No malware indicators found","Nothing in this app matches known malware behaviour."],
+            low:["var(--low)","No malware found, but sensitive capabilities","The app can do sensitive things (for example record audio or load code at runtime). Normal apps do this too. See the Malware tab."],
+            suspicious:["var(--med)","Suspicious behaviour","Several malware-like patterns were found. Check the Malware tab before installing."],
+            malicious:["var(--crit)","Likely malicious","Strong malware patterns were found. Do not install this app."]}[m.verdict];
+  $("#mal-verdict").innerHTML = `<i class="dot" style="background:${mv[0]}"></i>${mv[1]}`;
+  $("#mal-sub").textContent = mv[2];
   $("#sev-title").textContent = `${s.total} finding${s.total===1?"":"s"}`;
-  $("#sevbar").innerHTML = SEV.filter(k=>s[k.toLowerCase()]).map(k=>`<i style="flex-grow:${s[k.toLowerCase()]};background:${SEVC[k]}" title="${k}: ${s[k.toLowerCase()]}"></i>`).join("");
   $("#sevcounts").innerHTML = SEV.map(k=>{ const n=s[k.toLowerCase()];
     return `<button data-sev="${k}" class="${state.sev.has(k)?"active":""} ${n?"":"zero"}" aria-pressed="${state.sev.has(k)}"><b>${n}</b><span><i class="dot" style="background:${SEVC[k]}"></i>${k}</span></button>`; }).join("");
   document.querySelectorAll("#sevcounts button").forEach(b=>b.onclick=()=>{ toggleSev(b.dataset.sev); });
   const st=r.stats||{};
-  const facts=[["Target SDK",r.target_sdk],["Min SDK",r.min_sdk],["Size",`${r.file_size_mb} MB`],["Scan time",`${r.scan_metadata.scan_time_seconds} s`],
-    ["Classes",`${(st.classes||0).toLocaleString()} in ${st.dex_files||0} DEX`],["Signature",["v1","v2","v3","v4"].filter(v=>r.signing&&r.signing[v]).join(" + ")||"unsigned"],
-    ["Built with",(r.frameworks||[]).join(", ")||"–"],["Trackers",String((r.trackers||[]).length)]];
+  const facts=[["Target SDK",r.target_sdk],["Min SDK",r.min_sdk],["Size",`${r.file_size_mb} MB`],["Signature",["v1","v2","v3","v4"].filter(v=>r.signing&&r.signing[v]).join(" + ")||"unsigned"],
+    ["Classes",`${(st.classes||0).toLocaleString()} in ${st.dex_files||0} DEX`],["Built with",(r.frameworks||[]).join(", ")||"–"],["Trackers",String((r.trackers||[]).length)],["Scan time",`${r.scan_metadata.scan_time_seconds} s`]];
   $("#facts").innerHTML = facts.map(([k,v])=>`<div><dt>${k}</dt><dd title="${esc(v)}">${esc(v)}</dd></div>`).join("");
 }
 function toggleSev(k){ state.sev.has(k)?state.sev.delete(k):state.sev.add(k); state.tab="findings"; renderMeters(); renderTabs(); renderPanel(); }
@@ -672,7 +600,6 @@ const TABS = [
   ["secrets","Secrets", r=>(r.secrets||[]).length],
   ["signing","Certificate", r=>(r.signing&&r.signing.certificates||[]).length],
   ["sdk","SDKs & defences", r=>(r.trackers||[]).length+(r.security_controls||[]).length],
-  ["owasp","OWASP coverage", r=>10],
 ];
 function renderTabs(){
   const r=state.report;
@@ -742,13 +669,13 @@ function bindFindings(){
 }
 function pMalware(r){
   const m=r.malware;
-  const sig = m.signals.length ? `<ul class="list">${m.signals.map(s=>`<li><span class="w">+${s.weight}</span><span>${esc(s.label)}${(s.evidence||[]).length?`<span class="ev">${esc(s.evidence.join(" | "))}</span>`:""}</span></li>`).join("")}</ul>` : `<p class="sub">No malware patterns were matched.</p>`;
-  const caps = m.capabilities.length ? `<ul class="list">${m.capabilities.map(c=>`<li><span class="w cap">${c.weight||"0"}</span><span>${esc(c.label)}${(c.evidence||[]).length?`<span class="ev">${esc(c.evidence.slice(0,3).join(" | "))}</span>`:""}</span></li>`).join("")}</ul>` : `<p class="sub">No sensitive capabilities detected.</p>`;
+  const sig = m.signals.length ? `<ul class="list">${m.signals.map(s=>`<li><span class="dot" style="background:var(--crit);margin-top:8px"></span><span>${esc(s.label)}${(s.evidence||[]).length?`<span class="ev">${esc(s.evidence.join(" | "))}</span>`:""}</span></li>`).join("")}</ul>` : `<p class="sub">No malware patterns were matched.</p>`;
+  const caps = m.capabilities.length ? `<ul class="list">${m.capabilities.map(c=>`<li><span class="dot" style="background:var(--med);margin-top:8px"></span><span>${esc(c.label)}${(c.evidence||[]).length?`<span class="ev">${esc(c.evidence.slice(0,3).join(" | "))}</span>`:""}</span></li>`).join("")}</ul>` : `<p class="sub">No sensitive capabilities detected.</p>`;
   return `<div class="grid2">
-    <div class="panel"><h3>Signals</h3><p class="sub">Patterns typical of malware families. The number is each signal's weight in the score.</p>${sig}</div>
+    <div class="panel"><h3>Signals</h3><p class="sub">Patterns typical of malware families.</p>${sig}</div>
     <div class="panel"><h3>Capabilities</h3><p class="sub">What the app is able to do. Not bad on its own, but risky in combination.</p>${caps}</div>
   </div>
-  <p class="note">${esc(m.note)} Look up this file on <a href="https://www.virustotal.com/gui/file/${esc(r.file_hash_sha256)}" target="_blank" rel="noopener">VirusTotal</a>.</p>
+  <p class="note">This is a static check: it shows what the app is able to do, not proof that it does it. Look up this file on <a href="https://www.virustotal.com/gui/file/${esc(r.file_hash_sha256)}" target="_blank" rel="noopener">VirusTotal</a>.</p>
   ${(r.packers||[]).length?`<p>Packer detected: <b>${esc(r.packers.join(", "))}</b>. Static results only cover the unpacking stub.</p>`:""}`;
 }
 function pPerms(r){
@@ -818,7 +745,7 @@ function pOwasp(r){
   <h3 style="font-size:14px;font-weight:500;color:var(--muted);margin:28px 0 10px">MASVS control groups</h3>
   <div class="tscroll"><table class="t"><tbody>${Object.values(r.masvs).map(m=>`<tr><td><b>${esc(m.id)}</b></td><td style="color:var(--muted)">${esc(m.title)}</td><td>${m.count}</td></tr>`).join("")}</tbody></table></div>`;
 }
-document.addEventListener("click", e=>{ const g=e.target.closest("[data-goto]"); if(g){ state.owasp=g.dataset.goto; state.tab="findings"; renderRing(); renderTabs(); renderPanel(); $("#tabs").scrollIntoView({behavior:reduceMotion?"auto":"smooth"}); } });
+
 
 /* ---------------- exports & history ---------------- */
 function download(name, data, type){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([data],{type})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000); }

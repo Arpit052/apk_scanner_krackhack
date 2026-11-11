@@ -20,7 +20,7 @@ Started at the KrackHack hackathon; v3 is a ground-up rewrite of the analysis en
 | Malware | ≥1 weak indicator ⇒ "MALWARE DETECTED" | weighted 0–100 model: capabilities + signals + dangerous combinations, packer & payload detection |
 | Standards | OWASP 2016 labels | OWASP Mobile Top 10 **2024** + MASVS + CWE |
 | Output | JSON / print | JSON, **SARIF** (GitHub code scanning), print/PDF, CLI with `--fail-on` for CI |
-| UI | static dashboard | live scan with streaming log, interactive OWASP wheel, 9 deep-dive tabs |
+| UI | static dashboard | live scan with streaming log, simple report with findings list and detail tabs |
 
 ### Accuracy on real apps
 
@@ -28,7 +28,7 @@ Started at the KrackHack hackathon; v3 is a ground-up rewrite of the analysis en
 |---|---|---|
 | **InsecureShop** (intentionally vulnerable) | 7 findings; missed debuggable, cleartext, exported provider, root-path FileProvider, deep-link → WebView, SSL `proceed()` | 26 findings incl. all of those, each with the class it's in |
 | **Allsafe** (intentionally vulnerable) | – | flags AES/ECB, hardcoded key `1nf0…`, SQLi string concatenation, intent redirection in `ProxyActivity`, cleartext domain config, credentials in URL |
-| **NewPipe** (legit open-source app) | "Missing APK Signature" **Critical** + **MALWARE DETECTED** (false positives) | correctly signed v1+v2+v3, malware risk 3/100, grade C |
+| **NewPipe** (legit open-source app) | "Missing APK Signature" **Critical** + **MALWARE DETECTED** (false positives) | correctly signed v1+v2+v3, no malware indicators |
 | **Termux** 110 MB debug build | – | scanned in ~2 s; debuggable, weak `RUN_COMMAND` permission, exported services |
 
 ---
@@ -47,7 +47,7 @@ APK ──► manifest (pyaxmlparser) ──► components, exported rules, NSC,
                      │
                      ▼
      findings (OWASP 2024 · MASVS · CWE · confidence · locations)
-     security score (A–F) · malware risk model (0–100)
+     malware verdict (clean / low / suspicious / likely malicious)
 ```
 
 Findings that only appear inside third-party libraries are marked `[library]`, downgraded, and can be hidden in the UI, so most of the noise from SDK dead code goes away.
