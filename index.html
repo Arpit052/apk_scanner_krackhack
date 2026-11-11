@@ -1,2144 +1,747 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APK Security Scanner - Real Analysis</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <style>
-        :root {
-            --bg-primary: #0a0e17;
-            --bg-secondary: #131824;
-            --bg-tertiary: #1a2030;
-            --accent-primary: #00d9ff;
-            --accent-secondary: #7c3aed;
-            --accent-danger: #ef4444;
-            --accent-warning: #f59e0b;
-            --accent-success: #10b981;
-            --text-primary: #e5e7eb;
-            --text-secondary: #9ca3af;
-            --text-muted: #6b7280;
-            --border: #2d3748;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'IBM Plex Sans', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes scaleIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-        }
-
-        @keyframes glow {
-            0%, 100% {
-                box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 30px rgba(0, 217, 255, 0.6);
-            }
-        }
-
-        @keyframes shimmer {
-            0% {
-                background-position: -1000px 0;
-            }
-            100% {
-                background-position: 1000px 0;
-            }
-        }
-
-        @keyframes bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes zoomIn {
-            from {
-                opacity: 0;
-                transform: scale(0.5);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .animated {
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        .slide-in {
-            animation: slideIn 0.5s ease-out;
-        }
-
-        .scale-in {
-            animation: scaleIn 0.4s ease-out;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 2rem;
-            background: var(--bg-secondary);
-            border-bottom: 2px solid var(--accent-primary);
-            margin-bottom: 2rem;
-            animation: slideIn 0.5s ease-out;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        .logo-text {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.25rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-tab {
-            padding: 0.5rem 0;
-            color: var(--text-secondary);
-            text-decoration: none;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            cursor: pointer;
-            animation: fadeInUp 0.6s ease-out;
-            animation-fill-mode: both;
-        }
-
-        .nav-tab:nth-child(1) { animation-delay: 0.1s; }
-        .nav-tab:nth-child(2) { animation-delay: 0.2s; }
-        .nav-tab:nth-child(3) { animation-delay: 0.3s; }
-        .nav-tab:nth-child(4) { animation-delay: 0.4s; }
-
-        .nav-tab.active {
-            color: var(--accent-primary);
-            border-bottom-color: var(--accent-primary);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        .nav-tab:hover {
-            color: var(--text-primary);
-            transform: translateY(-3px);
-        }
-
-        .screen-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(90deg, var(--text-primary), var(--accent-primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        .screen-subtitle {
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-            animation: fadeIn 1s ease-out;
-        }
-
-        .upload-zone {
-            background: var(--bg-secondary);
-            border: 3px dashed var(--border);
-            border-radius: 12px;
-            padding: 4rem 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            margin-bottom: 2rem;
-            animation: scaleIn 0.6s ease-out;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .upload-zone::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent,
-                rgba(0, 217, 255, 0.05),
-                transparent
-            );
-            animation: shimmer 3s infinite;
-        }
-
-        .upload-zone:hover, .upload-zone.dragover {
-            border-color: var(--accent-primary);
-            background: var(--bg-tertiary);
-            animation: glow 1.5s ease-in-out infinite;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
-        }
-
-        .upload-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.5rem;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            animation: bounce 2s ease-in-out infinite;
-            position: relative;
-            z-index: 1;
-        }
-
-        .upload-text {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .file-info {
-            display: none;
-            background: var(--bg-tertiary);
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            border-left: 4px solid var(--accent-success);
-        }
-
-        .file-info.active {
-            display: block;
-            animation: slideIn 0.5s ease-out;
-        }
-
-        .file-name {
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-            margin-bottom: 0.5rem;
-        }
-
-        .btn {
-            padding: 0.875rem 2rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'IBM Plex Sans', sans-serif;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:active::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            color: white;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 217, 255, 0.3);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 2px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--accent-primary);
-            transform: translateY(-2px);
-        }
-
-        .progress-container {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--border);
-            border-top-color: var(--accent-primary);
-            border-radius: 50%;
-            animation: rotate 0.8s linear infinite;
-        }
-
-        .results-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .summary-card {
-            background: var(--bg-secondary);
-            padding: 2rem;
-            border-radius: 12px;
-            text-align: center;
-            border: 2px solid var(--border);
-            transition: all 0.3s ease;
-            animation: scaleIn 0.5s ease-out;
-            animation-fill-mode: both;
-        }
-
-        .summary-card:nth-child(1) { animation-delay: 0.1s; }
-        .summary-card:nth-child(2) { animation-delay: 0.2s; }
-        .summary-card:nth-child(3) { animation-delay: 0.3s; }
-        .summary-card:nth-child(4) { animation-delay: 0.4s; }
-
-        .summary-card:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(0, 217, 255, 0.3);
-        }
-
-        .summary-card.critical {
-            border-color: var(--accent-danger);
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), var(--bg-secondary));
-        }
-
-        .summary-card.high {
-            border-color: var(--accent-warning);
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), var(--bg-secondary));
-        }
-
-        .summary-card.medium {
-            border-color: var(--accent-primary);
-            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), var(--bg-secondary));
-        }
-
-        .summary-card.low {
-            border-color: var(--accent-success);
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), var(--bg-secondary));
-        }
-
-        .summary-number {
-            font-size: 3rem;
-            font-weight: 700;
-            font-family: 'JetBrains Mono', monospace;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .summary-card.critical .summary-number {
-            background: linear-gradient(135deg, var(--accent-danger), #dc2626);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .summary-card.high .summary-number {
-            background: linear-gradient(135deg, var(--accent-warning), #d97706);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .summary-card.medium .summary-number {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .summary-card.low .summary-number {
-            background: linear-gradient(135deg, var(--accent-success), #059669);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .summary-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Charts Section */
-        .charts-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .chart-container {
-            background: var(--bg-secondary);
-            padding: 2rem;
-            border-radius: 12px;
-            border: 2px solid var(--border);
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        .chart-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--accent-primary);
-        }
-
-        .chart-canvas {
-            max-height: 300px;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            animation: slideIn 0.6s ease-out;
-        }
-
-        .tab {
-            padding: 0.75rem 1.5rem;
-            background: var(--bg-secondary);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .tab::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent-primary);
-            transition: width 0.3s ease;
-        }
-
-        .tab:hover {
-            border-color: var(--accent-primary);
-            transform: translateY(-2px);
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), var(--bg-tertiary));
-            border-color: var(--accent-primary);
-            color: var(--accent-primary);
-        }
-
-        .tab.active::after {
-            width: 100%;
-        }
-
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .vulnerability-card {
-            background: var(--bg-secondary);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            animation: slideIn 0.5s ease-out;
-            animation-fill-mode: both;
-        }
-
-        .vulnerability-card:hover {
-            transform: translateX(10px) scale(1.02);
-            border-color: var(--accent-primary);
-            box-shadow: -5px 5px 30px rgba(0, 217, 255, 0.2);
-        }
-            border-color: var(--accent-primary);
-            box-shadow: -5px 0 15px rgba(0, 217, 255, 0.1);
-        }
-
-        .vulnerability-card.critical {
-            border-left: 4px solid var(--accent-danger);
-        }
-
-        .vulnerability-card.high {
-            border-left: 4px solid var(--accent-warning);
-        }
-
-        .vulnerability-card.medium {
-            border-left: 4px solid var(--accent-primary);
-        }
-
-        .vulnerability-card.low {
-            border-left: 4px solid var(--accent-success);
-        }
-
-        .vulnerability-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.75rem;
-        }
-
-        .vulnerability-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .vulnerability-meta {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .meta-tag {
-            background: var(--bg-tertiary);
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--text-secondary);
-        }
-
-        .severity-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .severity-badge.critical {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--accent-danger);
-            border: 1px solid var(--accent-danger);
-        }
-
-        .severity-badge.high {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--accent-warning);
-            border: 1px solid var(--accent-warning);
-        }
-
-        .severity-badge.medium {
-            background: rgba(0, 217, 255, 0.2);
-            color: var(--accent-primary);
-            border: 1px solid var(--accent-primary);
-        }
-
-        .severity-badge.low {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--accent-success);
-            border: 1px solid var(--accent-success);
-        }
-
-        .vulnerability-description {
-            color: var(--text-secondary);
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
-        .vulnerability-details {
-            display: none;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border);
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .vulnerability-card.expanded .vulnerability-details {
-            display: block;
-        }
-
-        .detail-section {
-            margin-bottom: 1.5rem;
-        }
-
-        .detail-title {
-            font-weight: 600;
-            color: var(--accent-primary);
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .code-block {
-            background: var(--bg-primary);
-            padding: 1rem;
-            border-radius: 6px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            border-left: 3px solid var(--accent-primary);
-            color: var(--accent-primary);
-        }
-
-        .export-section {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 2rem;
-            border: 2px solid var(--border);
-            animation: fadeIn 1s ease-out;
-        }
-
-        .export-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--accent-primary);
-        }
-
-        .export-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .export-option {
-            background: var(--bg-tertiary);
-            padding: 1.5rem;
-            border-radius: 8px;
-            border: 2px solid var(--border);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .export-option:hover {
-            border-color: var(--accent-primary);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(0, 217, 255, 0.2);
-        }
-
-        .export-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .export-label {
-            font-weight: 500;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .notification {
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
-            background: var(--bg-secondary);
-            border: 2px solid var(--accent-success);
-            border-radius: 8px;
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            z-index: 1000;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .notification.active {
-            transform: translateX(0);
-            animation: slideIn 0.5s ease-out;
-        }
-
-        .notification.error {
-            border-color: var(--accent-danger);
-        }
-
-        .notification-icon {
-            width: 24px;
-            height: 24px;
-            background: var(--accent-success);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .notification.error .notification-icon {
-            background: var(--accent-danger);
-        }
-
-        .progress-step {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-            margin-bottom: 0.75rem;
-            transition: all 0.3s ease;
-            animation: slideIn 0.5s ease-out;
-            animation-fill-mode: both;
-        }
-
-        .progress-step.active {
-            background: linear-gradient(90deg, rgba(0, 217, 255, 0.1), var(--bg-tertiary));
-            border-left: 3px solid var(--accent-primary);
-        }
-
-        .progress-step.completed {
-            border-left: 3px solid var(--accent-success);
-        }
-
-        /* Navigation buttons */
-        .navigation-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: space-between;
-            margin-top: 2rem;
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        .nav-left {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .nav-right {
-            display: flex;
-            gap: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .results-summary {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .charts-section {
-                grid-template-columns: 1fr;
-            }
-
-            .tabs {
-                overflow-x: auto;
-                flex-wrap: nowrap;
-            }
-
-            .navigation-buttons {
-                flex-direction: column;
-            }
-
-            .nav-left, .nav-right {
-                width: 100%;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APK X-Ray · KrackHack Scanner</title>
+<meta name="description" content="Static security and malware analysis for Android apps, mapped to the OWASP Mobile Top 10 (2024) and MASVS.">
+<link rel="preload" href="/static/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/static/fonts/figtree-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%237CF7FF' stroke-width='6' stroke-dasharray='30 11'/%3E%3Ccircle cx='32' cy='32' r='9' fill='%23FF3D7F'/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:'Big Shoulders Display';font-weight:700;font-style:normal;font-display:swap;src:url(/static/fonts/big-shoulders-display-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Big Shoulders Display';font-weight:800;font-style:normal;font-display:swap;src:url(/static/fonts/big-shoulders-display-latin-800-normal.woff2) format('woff2')}
+@font-face{font-family:'Big Shoulders Display';font-weight:900;font-style:normal;font-display:swap;src:url(/static/fonts/big-shoulders-display-latin-900-normal.woff2) format('woff2')}
+@font-face{font-family:'Figtree';font-weight:400;font-style:normal;font-display:swap;src:url(/static/fonts/figtree-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Figtree';font-weight:500;font-style:normal;font-display:swap;src:url(/static/fonts/figtree-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Figtree';font-weight:600;font-style:normal;font-display:swap;src:url(/static/fonts/figtree-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Figtree';font-weight:700;font-style:normal;font-display:swap;src:url(/static/fonts/figtree-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-weight:400;font-style:normal;font-display:swap;src:url(/static/fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-weight:600;font-style:normal;font-display:swap;src:url(/static/fonts/jetbrains-mono-latin-600-normal.woff2) format('woff2')}
+:root{
+  --bg:#071330; --bg2:#0A1A42; --panel:#0D2152; --panel2:#11295F;
+  --line:rgba(124,247,255,.16); --line2:rgba(124,247,255,.32);
+  --xray:#7CF7FF; --xray-dim:#3FB7C9; --bone:#E6EEFF; --muted:#93A7D6; --faint:#5C70A3;
+  --crit:#FF3D7F; --high:#FF8A3D; --med:#FFC94A; --low:#6FA8FF; --info:#8A9BC4; --ok:#4BE3A0;
+  --display:'Big Shoulders Display', 'Arial Narrow', sans-serif;
+  --body:'Figtree', system-ui, sans-serif;
+  --mono:'JetBrains Mono', ui-monospace, monospace;
+  --cut:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--bone);font:16px/1.55 var(--body);min-height:100vh;overflow-x:hidden;
+  background-image:
+    radial-gradient(1200px 700px at 78% -10%, rgba(63,183,201,.18), transparent 60%),
+    radial-gradient(900px 600px at -10% 110%, rgba(255,61,127,.10), transparent 60%),
+    linear-gradient(rgba(124,247,255,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,247,255,.045) 1px, transparent 1px);
+  background-size:auto,auto,32px 32px,32px 32px;}
+a{color:var(--xray)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--xray);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1320px;margin:0 auto;padding:0 28px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- top bar ---------- */
+header.top{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--bone)}
+.brand svg{width:34px;height:34px}
+.brand b{font:800 26px/1 var(--display);letter-spacing:.01em}
+.brand span{color:var(--muted);font-size:14px}
+.top nav{display:flex;gap:6px;align-items:center}
+.ghost{background:none;border:1px solid var(--line2);border-radius:999px;padding:8px 16px;cursor:pointer;text-decoration:none;color:var(--bone);font-size:14px}
+.ghost:hover{border-color:var(--xray);color:var(--xray)}
+
+/* ---------- landing ---------- */
+#view-landing{position:relative}
+.lens{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+  font:12px/1.6 var(--mono);color:rgba(124,247,255,.75);white-space:pre-wrap;word-break:break-all;
+  -webkit-mask-image:radial-gradient(260px 260px at var(--mx,50%) var(--my,40%), #000 0, rgba(0,0,0,.35) 45%, transparent 72%);
+          mask-image:radial-gradient(260px 260px at var(--mx,50%) var(--my,40%), #000 0, rgba(0,0,0,.35) 45%, transparent 72%);
+  opacity:.0;transition:opacity .4s}
+body.has-pointer .lens{opacity:.55}
+.hero{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:48px;align-items:center;padding:36px 0 60px}
+.hero h1{font:900 clamp(64px,9vw,132px)/.86 var(--display);letter-spacing:-.01em;margin:0 0 22px;text-wrap:balance}
+.hero h1 .ghosted{display:block;color:transparent;-webkit-text-stroke:1.5px var(--xray);text-shadow:0 0 30px rgba(124,247,255,.25)}
+.hero p.lede{font-size:19px;color:var(--muted);max-width:34em;margin:0 0 30px}
+.drop{position:relative;border:1.5px dashed var(--line2);background:rgba(13,33,82,.55);backdrop-filter:blur(6px);
+  clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));
+  padding:26px 26px 24px;display:flex;gap:20px;align-items:center;cursor:pointer;transition:border-color .2s, background .2s}
+.drop:hover,.drop.over{border-color:var(--xray);background:rgba(17,41,95,.75)}
+.drop.over{box-shadow:inset 0 0 60px rgba(124,247,255,.18)}
+.drop .glyph{flex:0 0 64px;height:64px;border:1.5px solid var(--xray);display:grid;place-items:center;
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.drop strong{display:block;font:700 22px/1.2 var(--body)}
+.drop small{color:var(--muted);font-size:14px}
+.cta-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:18px;align-items:center}
+.btn{border:none;cursor:pointer;padding:14px 22px;font-weight:700;font-size:15px;background:var(--xray);color:#04122E;
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.btn:hover{background:#B4FBFF}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.link{background:none;border:none;color:var(--xray);cursor:pointer;padding:6px 0;font-weight:600;text-decoration:underline;text-underline-offset:4px}
+.picked{font-size:14px;color:var(--muted)}
+.checks{position:relative;z-index:1;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:1px solid var(--line);margin-bottom:56px}
+.checks div{padding:18px 18px 18px 0;border-right:1px solid var(--line)}
+.checks div:last-child{border-right:none}
+.checks b{display:block;font:800 30px/1 var(--display);color:var(--xray)}
+.checks span{color:var(--muted);font-size:14px}
+.history{position:relative;z-index:1;margin-bottom:60px}
+.history h2{font:800 30px/1 var(--display);margin:0 0 14px}
+.hist-list{display:flex;flex-wrap:wrap;gap:10px}
+.hist{display:flex;gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--line);background:rgba(13,33,82,.5);cursor:pointer;border-radius:6px}
+.hist:hover{border-color:var(--xray)}
+.hist .g{font:900 28px/1 var(--display);width:28px;text-align:center}
+.hist small{display:block;color:var(--muted);font-size:12px}
+
+/* ---------- the ring ---------- */
+.ring-box{position:relative;aspect-ratio:1;width:100%;max-width:560px;justify-self:center}
+.ring-box svg{width:100%;height:100%;overflow:visible}
+.ring-idle .ringspin{animation:spin 40s linear infinite;transform-origin:300px 300px}
+.sweep{transform-origin:300px 300px;animation:spin 2.4s linear infinite;opacity:0;transition:opacity .4s}
+.scanning .sweep{opacity:1}
+@keyframes spin{to{transform:rotate(360deg)}}
+.seg{transition:fill .5s, opacity .5s, transform .3s;transform-origin:300px 300px;cursor:default}
+.seg.clickable{cursor:pointer}
+.seg.clickable:hover{transform:scale(1.025)}
+.seg.dim{opacity:.25}
+.ring-center{font-family:var(--display);text-anchor:middle;fill:var(--bone)}
+.stage-arc{fill:rgba(124,247,255,.08);transition:fill .45s}
+.stage-arc.on{fill:var(--xray)}
+.stage-arc.run{fill:rgba(124,247,255,.45);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{fill:rgba(124,247,255,.15)}}
+
+/* ---------- scanning ---------- */
+#view-scan{display:none;padding:20px 0 60px}
+.scan-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:center}
+.scan-title{font:900 clamp(48px,6vw,86px)/.9 var(--display);margin:0 0 8px;word-break:break-all}
+.scan-sub{color:var(--muted);margin:0 0 26px}
+.term{background:#05102A;border:1px solid var(--line);padding:16px 18px;height:330px;overflow:auto;font:13px/1.7 var(--mono);
+  clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut))}
+.term .l{color:var(--muted);white-space:pre-wrap}
+.term .l b{color:var(--xray);font-weight:600}
+.term .l.err{color:var(--crit)}
+.term .cursor{display:inline-block;width:8px;height:15px;background:var(--xray);vertical-align:-2px;animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.bar{height:4px;background:rgba(124,247,255,.12);margin:18px 0 10px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--xray);box-shadow:0 0 18px var(--xray);transition:width .4s}
+
+/* ---------- report ---------- */
+#view-report{display:none;padding:6px 0 80px}
+.r-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;padding:10px 0 26px;border-bottom:1px solid var(--line)}
+.app-id{display:flex;gap:18px;align-items:center;min-width:0}
+.app-id img,.app-id .noicon{width:72px;height:72px;border-radius:18px;background:var(--panel2);flex:0 0 72px;object-fit:cover;border:1px solid var(--line2)}
+.app-id h1{font:900 clamp(40px,5vw,68px)/.92 var(--display);margin:0;word-break:break-word}
+.app-id .pkg{color:var(--muted);font-size:15px;word-break:break-all}
+.app-id .pkg code{font-family:var(--mono);font-size:13px;color:var(--bone)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
+.r-top{display:grid;grid-template-columns:minmax(300px,440px) minmax(0,1fr);gap:40px;padding:34px 0 10px;align-items:start}
+.ring-legend{font-size:13px;color:var(--muted);text-align:center;margin-top:-4px}
+.ring-legend button{margin-left:6px}
+.meters{display:grid;gap:22px}
+.meter-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.panel{background:linear-gradient(180deg,rgba(17,41,95,.75),rgba(13,33,82,.6));border:1px solid var(--line);padding:22px 24px;position:relative;
+  clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut))}
+.panel h3{font:800 24px/1.1 var(--display);margin:0 0 4px;letter-spacing:.01em}
+.panel .sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+.big{font:900 84px/.85 var(--display)}
+.big small{font-size:28px;color:var(--muted);font-weight:700}
+.verdict{font:800 26px/1 var(--display)}
+.scale{position:relative;height:14px;margin:18px 0 8px;background:linear-gradient(90deg,var(--ok) 0 15%,var(--low) 15% 35%,var(--med) 35% 60%,var(--crit) 60% 100%);opacity:.9;
+  clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
+.scale-pin{position:absolute;top:-8px;width:3px;height:30px;background:var(--bone);box-shadow:0 0 12px var(--bone);transition:left 1.2s cubic-bezier(.2,.8,.2,1);left:0}
+.scale-lab{display:flex;justify-content:space-between;font-size:12px;color:var(--faint)}
+.sevbar{display:flex;height:18px;margin:14px 0 12px;gap:3px}
+.sevbar i{display:block;height:100%;transition:flex-grow .8s}
+.sevcounts{display:flex;flex-wrap:wrap;gap:6px 18px}
+.sevcounts button{background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:baseline;gap:6px;color:var(--muted)}
+.sevcounts button b{font:800 30px/1 var(--display);color:var(--bone)}
+.sevcounts button.active b{text-decoration:underline;text-underline-offset:5px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:0 0 10px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.facts div{padding:14px 16px 14px 0}
+.facts dt{color:var(--faint);font-size:13px}
+.facts dd{margin:0;font-weight:600;word-break:break-word}
+
+.tabs{display:flex;gap:2px;margin:34px 0 0;border-bottom:1px solid var(--line2);overflow-x:auto;scrollbar-width:thin}
+.tab{background:none;border:none;padding:12px 18px 10px;cursor:pointer;color:var(--muted);font-weight:600;font-size:15px;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--bone)}
+.tab[aria-selected="true"]{color:var(--xray);border-bottom-color:var(--xray)}
+.tab .n{font-size:12px;color:var(--faint);margin-left:4px}
+.tabpanel{padding-top:24px}
+
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.search{flex:1 1 260px;background:#05102A;border:1px solid var(--line2);color:var(--bone);padding:11px 14px;font:inherit;border-radius:6px}
+.search::placeholder{color:var(--faint)}
+.chip{border:1px solid var(--line2);background:none;border-radius:999px;padding:6px 12px;cursor:pointer;font-size:14px;color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+.chip[aria-pressed="true"]{border-color:var(--bone);color:var(--bone);background:rgba(230,238,255,.08)}
+.toggle{display:inline-flex;gap:8px;align-items:center;color:var(--muted);font-size:14px;cursor:pointer}
+.toggle input{accent-color:var(--xray);width:16px;height:16px}
+
+.finding{border-left:4px solid var(--c,var(--info));background:rgba(13,33,82,.55);margin-bottom:8px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.finding>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 18px}
+.finding>summary::-webkit-details-marker{display:none}
+.finding>summary:hover{background:rgba(124,247,255,.04)}
+.sev{font:800 17px/1 var(--display);color:var(--c);letter-spacing:.02em}
+.f-title{font-weight:600}
+.f-meta{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tag{font-size:12px;border:1px solid var(--line2);border-radius:4px;padding:2px 7px;color:var(--muted);white-space:nowrap}
+.tag.lib{border-color:transparent;background:rgba(147,167,214,.14)}
+.tag.o{color:var(--xray);border-color:rgba(124,247,255,.4)}
+.f-body{padding:4px 18px 20px 128px;display:grid;gap:16px}
+.f-body p{margin:0;max-width:78ch;color:#C9D6F5}
+.f-body h4{margin:0 0 6px;font:700 13px/1 var(--body);color:var(--faint);letter-spacing:.02em}
+pre.code{margin:0;background:#05102A;border:1px solid var(--line);padding:12px 14px;overflow:auto;font:12.5px/1.6 var(--mono);color:#CFE9FF;max-height:320px;white-space:pre-wrap;word-break:break-word}
+.refs a{display:block;font-size:14px;word-break:break-all}
+.empty{padding:50px 0;text-align:center;color:var(--muted)}
+.empty b{display:block;font:800 34px/1 var(--display);color:var(--bone);margin-bottom:6px}
+
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{text-align:left;color:var(--faint);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line2);position:sticky;top:0;background:var(--bg)}
+table.t td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;word-break:break-word}
+table.t tr:hover td{background:rgba(124,247,255,.03)}
+.tscroll{max-height:620px;overflow:auto;border:1px solid var(--line)}
+.lvl{font-size:12px;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.lvl.dangerous{background:rgba(255,138,61,.16);color:var(--high)}
+.lvl.special{background:rgba(255,61,127,.16);color:var(--crit)}
+.lvl.signature{background:rgba(255,61,127,.28);color:#FFC2D6}
+.lvl.normal{background:rgba(147,167,214,.14);color:var(--muted)}
+.lvl.custom{background:rgba(124,247,255,.12);color:var(--xray)}
+.riskbar{width:90px;height:6px;background:rgba(255,255,255,.07);display:inline-block;vertical-align:middle}
+.riskbar i{display:block;height:100%}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.list{margin:0;padding:0;list-style:none}
+.list li{padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
+.list li:last-child{border-bottom:none}
+.w{font:800 20px/1 var(--display);color:var(--crit);min-width:44px}
+.w.cap{color:var(--med)}
+.list .ev{display:block;color:var(--faint);font:12px/1.5 var(--mono);word-break:break-all;margin-top:3px}
+.kv{display:grid;grid-template-columns:150px minmax(0,1fr);gap:6px 14px;font-size:14px}
+.kv dt{color:var(--faint)}
+.kv dd{margin:0;word-break:break-all}
+.kv dd code{font:12.5px var(--mono)}
+.scheme{display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-weight:600}
+.pill{display:inline-block;padding:4px 10px;border:1px solid var(--line2);border-radius:999px;margin:0 6px 6px 0;font-size:14px}
+.pill.on{border-color:var(--ok);color:var(--ok)}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(120px);visibility:hidden;background:var(--bone);color:#04122E;padding:12px 20px;font-weight:700;transition:transform .3s;z-index:50;border-radius:6px}
+.toast.show{transform:translateX(-50%) translateY(0);visibility:visible}
+.toast.err{background:var(--crit);color:#fff}
+footer{color:var(--faint);font-size:13px;padding:30px 0 40px;border-top:1px solid var(--line)}
+
+@media (max-width:980px){
+  .hero,.scan-grid,.r-top{grid-template-columns:1fr}
+  .ring-box{max-width:420px}
+  .checks{grid-template-columns:repeat(2,1fr)}
+  .checks div{border-right:none;border-bottom:1px solid var(--line)}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid2,.grid3,.meter-row{grid-template-columns:1fr}
+  .r-head{grid-template-columns:1fr}
+  .actions{justify-content:flex-start}
+}
+@media (max-width:640px){
+  .wrap{padding:0 16px}
+  .finding>summary{grid-template-columns:1fr;gap:6px}
+  .f-meta{justify-content:flex-start}
+  .f-body{padding:4px 16px 18px}
+  .brand span{display:none}
+  .kv{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .lens{display:none}
+}
+@media print{
+  body{background:#fff;color:#111}
+  header.top,.actions,.tabs,.filters,#view-landing,#view-scan,.ring-legend button,footer,.lens{display:none!important}
+  #view-report{display:block!important}
+  .panel,.finding{background:#fff;border-color:#ccc;color:#111;clip-path:none}
+  .tabpanel{display:block!important}
+  .f-body p,.panel .sub,.app-id .pkg{color:#333}
+  pre.code{background:#f5f5f5;color:#111;border-color:#ddd}
+  .finding{break-inside:avoid}
+}
+</style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">
-            <div class="logo-icon">🔒</div>
-            <div class="logo-text">APK SECURITY SCANNER</div>
+<div class="lens" id="lens" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#" id="home" aria-label="APK X-Ray home">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="26" fill="none" stroke="#7CF7FF" stroke-width="5" stroke-dasharray="30 11"/><circle cx="32" cy="32" r="9" fill="#FF3D7F"/></svg>
+      <b>APK X-Ray</b><span>by team KrackHack</span>
+    </a>
+    <nav>
+      <a class="ghost" href="/docs" target="_blank" rel="noopener">API</a>
+      <a class="ghost" href="https://github.com/Arpit052/apk_scanner_krackhack" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <!-- ================= LANDING ================= -->
+  <main id="view-landing">
+    <section class="hero">
+      <div>
+        <h1>Put any APK<span class="ghosted">under the X-ray.</span></h1>
+        <p class="lede">Drop an Android app and we take it apart: manifest, every DEX method call, certificates, secrets and SDKs. Each finding is mapped to the OWASP Mobile Top 10 (2024), with the exact class it lives in and the fix.</p>
+        <label class="drop" id="drop" tabindex="0">
+          <input type="file" id="file" accept=".apk,.xapk,.apks,.apkm" class="sr">
+          <span class="glyph" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7CF7FF" stroke-width="1.8"><path d="M12 16V4m0 0-5 5m5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg></span>
+          <span><strong id="drop-title">Drop an APK here, or click to browse</strong><small id="drop-sub">.apk, .xapk or .apks, up to 300 MB. Files are deleted right after the scan.</small></span>
+        </label>
+        <div class="cta-row">
+          <button class="btn" id="scan-btn" disabled>Start scan</button>
+          <button class="link" id="demo-btn">See a sample report</button>
+          <span class="picked" id="picked"></span>
         </div>
-        <div class="nav-tabs">
-            <div class="nav-tab active" onclick="switchMainTab('scanner')">Scanner</div>
-            <div class="nav-tab" onclick="switchMainTab('history')">History</div>
-            <div class="nav-tab" onclick="switchMainTab('documentation')">Documentation</div>
-            <div class="nav-tab" onclick="switchMainTab('settings')">Settings</div>
-        </div>
+      </div>
+      <div class="ring-box ring-idle" id="ring-landing"></div>
+    </section>
+
+    <section class="checks" aria-label="What gets checked">
+      <div><b>DEX</b><span>Bytecode call-site tracing with constant tracking</span></div>
+      <div><b>M1–M10</b><span>OWASP Mobile Top 10 2024 and MASVS mapping</span></div>
+      <div><b>v1–v4</b><span>Signature schemes, debug keys and Janus</span></div>
+      <div><b>30+</b><span>Secret formats, from AWS keys to Telegram bots</span></div>
+      <div><b>0–100</b><span>Malware risk model built on capabilities and combos</span></div>
+    </section>
+
+    <section class="history" id="history" hidden>
+      <h2>Recent scans</h2>
+      <div class="hist-list" id="hist-list"></div>
+    </section>
+  </main>
+
+  <!-- ================= SCANNING ================= -->
+  <main id="view-scan" aria-live="polite">
+    <div class="scan-grid">
+      <div class="ring-box scanning" id="ring-scan"></div>
+      <div>
+        <h1 class="scan-title" id="scan-name">app.apk</h1>
+        <p class="scan-sub" id="scan-sub">Uploading</p>
+        <div class="bar"><i id="scan-bar"></i></div>
+        <div class="term" id="term" role="log"></div>
+      </div>
     </div>
+  </main>
 
-    <div class="container">
-        <!-- Screen 1: Upload Screen -->
-        <div id="uploadScreen">
-            <div class="screen-title">APK Security Analysis</div>
-            <div class="screen-subtitle">Upload your APK file for comprehensive security vulnerability detection</div>
-            
-            <div class="upload-zone" id="uploadZone">
-                <div class="upload-icon">📱</div>
-                <div class="upload-text">Drop APK file here or click to browse</div>
-                <div style="color: var(--text-muted); margin-top: 0.5rem;">Supports .apk files up to 300MB</div>
-                <input type="file" id="fileInput" accept=".apk" style="display: none;">
-            </div>
-
-            <div class="file-info" id="fileInfo">
-                <div class="file-name" id="fileName"></div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;" id="fileSize"></div>
-            </div>
-
-            <button class="btn btn-primary" id="startScanBtn" disabled onclick="startScan()">
-                Start Security Scan
-            </button>
+  <!-- ================= REPORT ================= -->
+  <main id="view-report">
+    <section class="r-head">
+      <div class="app-id">
+        <span id="r-icon"></span>
+        <div>
+          <h1 id="r-name"></h1>
+          <div class="pkg" id="r-pkg"></div>
         </div>
+      </div>
+      <div class="actions">
+        <button class="ghost" id="exp-json">Download JSON</button>
+        <button class="ghost" id="exp-sarif">Download SARIF</button>
+        <button class="ghost" id="exp-print">Print / PDF</button>
+        <button class="btn" id="new-scan">Scan another app</button>
+      </div>
+    </section>
 
-        <!-- Screen 2: Scanning Screen -->
-        <div id="scanningScreen" class="hidden">
-            <div class="screen-title">Analyzing APK...</div>
-            <div class="screen-subtitle">Please wait while we perform a comprehensive security analysis</div>
-            
-            <div class="progress-container">
-                <div class="progress-step active" id="step1">
-                    <div class="spinner"></div>
-                    <div>
-                        <div style="font-weight: 600;">Extracting APK Structure</div>
-                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Analyzing manifest and resources</div>
-                    </div>
-                </div>
-                <div class="progress-step" id="step2">
-                    <div class="spinner"></div>
-                    <div>
-                        <div style="font-weight: 600;">Scanning for Vulnerabilities</div>
-                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Checking OWASP Mobile Top 10</div>
-                    </div>
-                </div>
-                <div class="progress-step" id="step3">
-                    <div class="spinner"></div>
-                    <div>
-                        <div style="font-weight: 600;">Analyzing Code Patterns</div>
-                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Detecting security anti-patterns</div>
-                    </div>
-                </div>
-                <div class="progress-step" id="step4">
-                    <div class="spinner"></div>
-                    <div>
-                        <div style="font-weight: 600;">Generating Report</div>
-                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Compiling findings and recommendations</div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn btn-secondary" onclick="cancelScan()" style="margin-top: 2rem;">
-                Cancel Scan
-            </button>
+    <section class="r-top">
+      <div>
+        <div class="ring-box" id="ring-report"></div>
+        <div class="ring-legend" id="ring-legend">Click a segment of the wheel to filter findings by OWASP risk.</div>
+      </div>
+      <div class="meters">
+        <div class="meter-row">
+          <div class="panel">
+            <h3>Security score</h3>
+            <p class="sub" id="score-sub"></p>
+            <div class="big" id="score-big">0<small>/100</small></div>
+          </div>
+          <div class="panel">
+            <h3>Malware risk</h3>
+            <p class="sub" id="mal-note">Heuristic, from capabilities and known malware patterns</p>
+            <div class="verdict" id="mal-verdict"></div>
+            <div class="scale" aria-hidden="true"><span class="scale-pin" id="mal-pin"></span></div>
+            <div class="scale-lab"><span>Clean</span><span>Low</span><span>Suspicious</span><span>Malicious</span></div>
+          </div>
         </div>
-
-        <!-- Screen 3: Results Summary Screen -->
-        <div id="resultsScreen" class="hidden">
-            <div class="screen-title">Security Analysis Results</div>
-            <div class="screen-subtitle" id="resultsFileName"></div>
-
-            <div class="results-summary" id="resultsSummary"></div>
-
-            <!-- Charts Section -->
-            <div class="charts-section">
-                <div class="chart-container">
-                    <div class="chart-title">Vulnerability Distribution</div>
-                    <canvas id="severityChart" class="chart-canvas"></canvas>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">OWASP Category Breakdown</div>
-                    <canvas id="owaspChart" class="chart-canvas"></canvas>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Risk Score Timeline</div>
-                    <canvas id="timelineChart" class="chart-canvas"></canvas>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">CWE Distribution</div>
-                    <canvas id="cweChart" class="chart-canvas"></canvas>
-                </div>
-            </div>
-
-            <div class="navigation-buttons">
-                <div class="nav-left">
-                    <button class="btn btn-secondary" onclick="goToUploadScreen()">← Back to Upload</button>
-                </div>
-                <div class="nav-right">
-                    <button class="btn btn-primary" onclick="goToVulnerabilitiesScreen()">View Vulnerabilities →</button>
-                </div>
-            </div>
+        <div class="panel">
+          <h3 id="sev-title">Findings</h3>
+          <div class="sevbar" id="sevbar"></div>
+          <div class="sevcounts" id="sevcounts"></div>
         </div>
+        <dl class="facts" id="facts"></dl>
+      </div>
+    </section>
 
-        <!-- Screen 4: Vulnerabilities Screen -->
-        <div id="vulnerabilitiesScreen" class="hidden">
-            <div class="screen-title">Detailed Vulnerabilities</div>
-            <div class="screen-subtitle">Click on any vulnerability card to expand details and remediation steps</div>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div id="panels"></div>
+  </main>
 
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('all')">All Vulnerabilities</div>
-                <div class="tab" onclick="switchTab('critical')">Critical</div>
-                <div class="tab" onclick="switchTab('high')">High</div>
-                <div class="tab" onclick="switchTab('medium')">Medium</div>
-                <div class="tab" onclick="switchTab('low')">Low</div>
-            </div>
+  <footer>
+    Static analysis only, so results are leads rather than proof. Confirm critical issues manually or with dynamic testing. OWASP and MASVS are projects of the OWASP Foundation.
+  </footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
 
-            <div class="tab-content active" id="tab-all">
-                <div id="vulnerabilitiesList"></div>
-            </div>
-            <div class="tab-content" id="tab-critical">
-                <div id="vulnerabilitiesCritical"></div>
-            </div>
-            <div class="tab-content" id="tab-high">
-                <div id="vulnerabilitiesHigh"></div>
-            </div>
-            <div class="tab-content" id="tab-medium">
-                <div id="vulnerabilitiesMedium"></div>
-            </div>
-            <div class="tab-content" id="tab-low">
-                <div id="vulnerabilitiesLow"></div>
-            </div>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const SEV = ["Critical","High","Medium","Low","Info"];
+const SEVC = {Critical:"var(--crit)",High:"var(--high)",Medium:"var(--med)",Low:"var(--low)",Info:"var(--info)"};
+const SEVHEX = {Critical:"#FF3D7F",High:"#FF8A3D",Medium:"#FFC94A",Low:"#6FA8FF",Info:"#8A9BC4"};
+const OWASP_SHORT = {M1:"Credentials",M2:"Supply chain",M3:"AuthN/AuthZ",M4:"Input/output",M5:"Communication",M6:"Privacy",M7:"Binary protection",M8:"Misconfiguration",M9:"Data storage",M10:"Cryptography"};
+const STAGES = [["manifest","Manifest"],["signing","Signature"],["dex","DEX"],["code","Code"],["secrets","Secrets"],["intel","Intel"]];
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let state = {file:null, report:null, jobId:null, tab:"findings", sev:new Set(), owasp:null, q:"", hideLib:false};
 
-            <div class="navigation-buttons">
-                <div class="nav-left">
-                    <button class="btn btn-secondary" onclick="goToResultsScreen()">← Back to Results</button>
-                </div>
-                <div class="nav-right">
-                    <button class="btn btn-primary" onclick="goToExportScreen()">Export Report →</button>
-                </div>
-            </div>
-        </div>
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(msg, err){ const t=$("#toast"); t.textContent=msg; t.className="toast show"+(err?" err":""); clearTimeout(t._h); t._h=setTimeout(()=>t.className="toast"+(err?" err":""),3600); }
+function fmtBytes(n){ return n>1048576 ? (n/1048576).toFixed(1)+" MB" : Math.max(1,Math.round(n/1024))+" KB"; }
 
-        <!-- Screen 5: Export Screen -->
-        <div id="exportScreen" class="hidden">
-            <div class="screen-title">Export Analysis Report</div>
-            <div class="screen-subtitle">Download the complete security analysis in your preferred format</div>
+/* ---------------- X-ray lens background ---------------- */
+(function lens(){
+  const el=$("#lens"); const hex="0123456789abcdef"; const words=["invoke-virtual","const-string","Landroid/webkit/WebView;","move-result-object","checkServerTrusted","iget-object","Ljavax/crypto/Cipher;","getInstance","sget-object","return-void","AndroidManifest.xml","classes.dex","resources.arsc","META-INF/CERT.RSA","setJavaScriptEnabled","onReceivedSslError","DexClassLoader","getParcelableExtra"];
+  let out=""; for(let i=0;i<900;i++){ out += (Math.random()<.18 ? words[i%words.length] : Array.from({length:8},()=>hex[Math.random()*16|0]).join("")) + "  "; }
+  el.textContent=out;
+  if(reduceMotion) return;
+  window.addEventListener("pointermove", e=>{ document.body.classList.add("has-pointer"); el.style.setProperty("--mx", e.clientX+"px"); el.style.setProperty("--my", e.clientY+"px"); }, {passive:true});
+})();
 
-            <div class="export-section">
-                <div class="export-title">Choose Export Format</div>
-                <div style="color: var(--text-secondary); margin-bottom: 1rem;">
-                    Select a format to download your security analysis report
-                </div>
-                <div class="export-options">
-                    <div class="export-option" onclick="exportReport('json')">
-                        <div class="export-icon">📄</div>
-                        <div class="export-label">JSON Report</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Machine-readable format</div>
-                    </div>
-                    <div class="export-option" onclick="exportReport('pdf')">
-                        <div class="export-icon">📑</div>
-                        <div class="export-label">PDF Report</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Professional document</div>
-                    </div>
-                    <div class="export-option" onclick="exportReport('html')">
-                        <div class="export-icon">🌐</div>
-                        <div class="export-label">HTML Report</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Interactive web page</div>
-                    </div>
-                    <div class="export-option" onclick="exportReport('csv')">
-                        <div class="export-icon">📊</div>
-                        <div class="export-label">CSV Export</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Spreadsheet compatible</div>
-                    </div>
-                </div>
-            </div>
+/* ---------------- Ring ---------------- */
+function arc(cx,cy,r1,r2,a0,a1){
+  const p=(r,a)=>[cx+r*Math.cos((a-90)*Math.PI/180), cy+r*Math.sin((a-90)*Math.PI/180)];
+  const large = (a1-a0)>180?1:0; const [x0,y0]=p(r2,a0),[x1,y1]=p(r2,a1),[x2,y2]=p(r1,a1),[x3,y3]=p(r1,a0);
+  return `M${x0},${y0} A${r2},${r2} 0 ${large} 1 ${x1},${y1} L${x2},${y2} A${r1},${r1} 0 ${large} 0 ${x3},${y3} Z`;
+}
+function ringSVG(mode, report){
+  const C=300, segs=10, gap=2.2;
+  let s=`<svg viewBox="0 0 600 600" role="img" aria-label="${mode==='report'?'OWASP Mobile Top 10 wheel':'Scanner'}">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="55%" stop-color="#7CF7FF" stop-opacity="0"/><stop offset="100%" stop-color="#7CF7FF" stop-opacity=".12"/></radialGradient>
+    <linearGradient id="sw" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7CF7FF" stop-opacity="0"/><stop offset="1" stop-color="#7CF7FF" stop-opacity=".55"/></linearGradient>
+  </defs>
+  <circle cx="300" cy="300" r="290" fill="url(#glow)"/>
+  <g class="ringspin">`;
+  for(let i=0;i<120;i++){ const a=i*3, long=i%10===0; const r1=long?268:274, r2=282;
+    const x1=C+r1*Math.sin(a*Math.PI/180), y1=C-r1*Math.cos(a*Math.PI/180), x2=C+r2*Math.sin(a*Math.PI/180), y2=C-r2*Math.cos(a*Math.PI/180);
+    s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#7CF7FF" stroke-opacity="${long?.7:.25}" stroke-width="${long?2:1}"/>`; }
+  s+=`</g>`;
+  // outer OWASP ring
+  for(let i=0;i<segs;i++){
+    const id="M"+(i+1), a0=i*36+gap, a1=(i+1)*36-gap;
+    let fill="rgba(124,247,255,.10)", extra=0, cls="seg";
+    if(mode==="report"){
+      const o=report.owasp[id]; if(o.count){ fill=SEVHEX[o.worst]; extra=Math.min(26, 8+o.count*4); cls+=" clickable"; } else { fill="rgba(75,227,160,.22)"; }
+      if(state.owasp && state.owasp!==id) cls+=" dim";
+    }
+    s+=`<path class="${cls}" data-owasp="${id}" d="${arc(C,C,196,236+extra,a0,a1)}" fill="${fill}" style="${mode==='report'&&!reduceMotion&&state.animateRing?`opacity:0;transition-delay:${i*70}ms`:''}"><title>${id} ${OWASP_SHORT[id]}${mode==='report'?` – ${report.owasp[id].count} finding(s)`:''}</title></path>`;
+    const mid=(a0+a1)/2, lr=mode==="report"?302:252, lx=C+lr*Math.sin(mid*Math.PI/180), ly=C-lr*Math.cos(mid*Math.PI/180);
+    s+=`<text x="${lx}" y="${ly+5}" text-anchor="middle" font-family="Big Shoulders Display" font-weight="800" font-size="17" fill="${mode==='report'&&report.owasp[id].count?'#E6EEFF':'#5C70A3'}">${id}</text>`;
+    if(mode==="report" && report.owasp[id].count){
+      const nr=216+extra/2, nx=C+nr*Math.sin(mid*Math.PI/180), ny=C-nr*Math.cos(mid*Math.PI/180);
+      s+=`<text x="${nx}" y="${ny+6}" text-anchor="middle" font-family="Big Shoulders Display" font-weight="900" font-size="19" fill="#04122E" pointer-events="none">${report.owasp[id].count}</text>`;
+    }
+  }
+  // inner stage ring
+  STAGES.forEach(([k],i)=>{ const a0=i*60+3, a1=(i+1)*60-3;
+    const on = mode==="report" ? " on" : ""; s+=`<path class="stage-arc${on}" data-stage="${k}" d="${arc(C,C,170,182,a0,a1)}"/>`; });
+  // sweep
+  s+=`<path class="sweep" d="${arc(C,C,40,190,0,50)}" fill="url(#sw)"/>`;
+  // center
+  if(mode==="report"){
+    const g=report.security.grade, gc={A:"#4BE3A0",B:"#6FA8FF",C:"#FFC94A",D:"#FF8A3D",F:"#FF3D7F"}[g];
+    s+=`<circle cx="300" cy="300" r="150" fill="#071330" stroke="rgba(124,247,255,.25)"/>
+        <text class="ring-center" x="300" y="345" font-size="168" font-weight="900" fill="${gc}" id="grade-text">${g}</text>
+        <text class="ring-center" x="300" y="388" font-size="20" font-weight="700" fill="#93A7D6">Grade</text>`;
+  } else {
+    s+=`<circle cx="300" cy="300" r="150" fill="#071330" stroke="rgba(124,247,255,.25)"/>
+        <text class="ring-center" x="300" y="330" font-size="${mode==='scan'?96:64}" font-weight="900" id="${mode}-center">${mode==='scan'?'0%':'APK'}</text>
+        <text class="ring-center" x="300" y="372" font-size="20" font-weight="700" fill="#93A7D6" id="${mode}-caption">${mode==='scan'?'uploading':'drop to scan'}</text>`;
+  }
+  return s+`</svg>`;
+}
+$("#ring-landing").innerHTML = ringSVG("idle");
 
-            <div class="navigation-buttons">
-                <div class="nav-left">
-                    <button class="btn btn-secondary" onclick="goToVulnerabilitiesScreen()">← Back to Vulnerabilities</button>
-                </div>
-                <div class="nav-right">
-                    <button class="btn btn-primary" onclick="resetScanner()">Scan New APK</button>
-                </div>
-            </div>
-        </div>
+/* ---------------- file picking ---------------- */
+const drop=$("#drop"), fileIn=$("#file");
+function pick(f){
+  if(!f) return;
+  if(!/\.(apk|xapk|apks|apkm)$/i.test(f.name)){ toast("That file isn't an APK. Choose a .apk, .xapk or .apks file.", true); return; }
+  if(f.size>300*1048576){ toast("This APK is larger than 300 MB, which is the upload limit.", true); return; }
+  state.file=f; $("#drop-title").textContent=f.name; $("#drop-sub").textContent=fmtBytes(f.size)+" ready to scan";
+  $("#scan-btn").disabled=false; $("#scan-btn").focus();
+}
+fileIn.addEventListener("change", e=>pick(e.target.files[0]));
+drop.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fileIn.click(); }});
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop", e=>pick(e.dataTransfer.files[0]));
+window.addEventListener("dragover", e=>e.preventDefault()); window.addEventListener("drop", e=>{ e.preventDefault(); if(e.dataTransfer.files[0] && $("#view-landing").style.display!=="none") pick(e.dataTransfer.files[0]); });
+$("#scan-btn").addEventListener("click", ()=>state.file && startScan(state.file));
+$("#demo-btn").addEventListener("click", async ()=>{
+  try{ const r=await fetch("/static/demo-report.json"); if(!r.ok) throw 0; const rep=await r.json(); state.jobId=null; showReport(rep, true); }
+  catch{ toast("The sample report couldn't be loaded.", true); }
+});
+$("#home").addEventListener("click", e=>{ e.preventDefault(); show("landing"); });
+$("#new-scan").addEventListener("click", ()=>{ state.file=null; $("#scan-btn").disabled=true; $("#drop-title").textContent="Drop an APK here, or click to browse"; $("#drop-sub").textContent=".apk, .xapk or .apks, up to 300 MB. Files are deleted right after the scan."; fileIn.value=""; show("landing"); });
+
+function show(v){
+  ["landing","scan","report"].forEach(x=>$("#view-"+x).style.display = x===v ? "block" : "none");
+  $("#lens").style.display = v==="landing" ? "" : "none";
+  window.scrollTo({top:0, behavior: reduceMotion?"auto":"smooth"});
+}
+
+/* ---------------- scanning ---------------- */
+function termLine(msg, cls){
+  const t=$("#term"); const cur=t.querySelector(".cursor"); if(cur) cur.remove();
+  const d=document.createElement("div"); d.className="l"+(cls?" "+cls:"");
+  const m=String(msg).match(/^\[\s*(\d+)%\]\s*(.*)$/);
+  d.innerHTML = m ? `<b>${m[1].padStart(3," ")}%</b>  ${esc(m[2])}` : esc(msg);
+  t.appendChild(d); const c=document.createElement("span"); c.className="cursor"; t.appendChild(c); t.scrollTop=t.scrollHeight;
+}
+function setProgress(pct, caption, stage){
+  $("#scan-bar").style.width=pct+"%";
+  const c=$("#scan-center"); if(c) c.textContent=Math.round(pct)+"%";
+  const cap=$("#scan-caption"); if(cap && caption) cap.textContent=caption;
+  if(stage){ const idx=STAGES.findIndex(s=>s[0]===stage);
+    document.querySelectorAll("#ring-scan .stage-arc").forEach((el,i)=>{ el.classList.toggle("on", idx>=0 && i<idx || stage==="score"||stage==="done"); el.classList.toggle("run", i===idx); }); }
+}
+function startScan(file){
+  show("scan"); $("#ring-scan").innerHTML=ringSVG("scan"); $("#term").innerHTML="";
+  $("#scan-name").textContent=file.name; $("#scan-sub").textContent=`Uploading ${fmtBytes(file.size)}`;
+  termLine(`$ xray scan ${file.name}`); setProgress(0,"uploading");
+  const fd=new FormData(); fd.append("file", file);
+  const xhr=new XMLHttpRequest(); xhr.open("POST","/api/scan");
+  xhr.upload.onprogress=e=>{ if(e.lengthComputable){ const p=e.loaded/e.total*100; $("#scan-bar").style.width=(p*0.25)+"%"; $("#scan-center").textContent=Math.round(p)+"%"; } };
+  xhr.onerror=()=>fail("The upload failed. Check your connection and try again.");
+  xhr.onload=()=>{
+    let body={}; try{ body=JSON.parse(xhr.responseText); }catch{}
+    if(xhr.status!==200) return fail(body.detail || `The server answered ${xhr.status}.`);
+    state.jobId=body.job_id; termLine("upload complete, job "+body.job_id); $("#scan-sub").textContent="Analysing";
+    poll(body.job_id, 0);
+  };
+  xhr.send(fd);
+}
+async function poll(id, since){
+  try{
+    const r=await fetch(`/api/scan/${id}?since=${since}`); const d=await r.json();
+    if(!r.ok) return fail(d.detail || "This scan is no longer available.");
+    (d.log||[]).forEach(l=>termLine(`[${String(l.pct).padStart(3)}%] ${l.msg}`, /^ERROR/.test(l.msg)?"err":""));
+    setProgress(d.progress, d.status==="queued"?"queued":d.stage, d.stage);
+    if(d.status==="done"){ setTimeout(()=>showReport(d.result), reduceMotion?0:700); return; }
+    if(d.status==="error") return fail(d.error || "The scan failed.");
+    setTimeout(()=>poll(id, d.log_total), 450);
+  }catch{ setTimeout(()=>poll(id, since), 1500); }
+}
+function fail(msg){ termLine("ERROR: "+msg, "err"); toast(msg, true); $("#scan-sub").textContent="Scan failed. Go back and try a different file.";
+  const cap=$("#scan-caption"); if(cap) cap.textContent="failed"; $("#ring-scan").classList.remove("scanning");
+  setTimeout(()=>{ if(!state.report) show("landing"); }, 4000); }
+
+/* ---------------- report ---------------- */
+function showReport(rep, isDemo){
+  state.report=rep; state.sev=new Set(); state.owasp=null; state.q=""; state.tab="findings";
+  if(!isDemo) saveHistory(rep);
+  show("report");
+  $("#r-icon").innerHTML = rep.icon ? `<img src="${esc(rep.icon)}" alt="">` : `<span class="noicon" style="display:block"></span>`;
+  $("#r-name").textContent = rep.app_name || rep.package_name;
+  $("#r-pkg").innerHTML = `<code>${esc(rep.package_name)}</code> version ${esc(rep.version_name||"?")} (${esc(rep.version_code)})${isDemo?" – sample report of the deliberately vulnerable InsecureShop app":""}`;
+  $("#exp-sarif").style.display = state.jobId ? "" : "none";
+  state.animateRing=true; renderRing(); state.animateRing=false; renderMeters(); renderTabs(); renderPanel();
+}
+function renderRing(){
+  const rep=state.report; $("#ring-report").innerHTML=ringSVG("report", rep);
+  requestAnimationFrame(()=>document.querySelectorAll("#ring-report .seg").forEach(el=>el.style.opacity=""));
+  document.querySelectorAll("#ring-report .seg.clickable").forEach(el=>el.addEventListener("click",()=>{
+    const id=el.dataset.owasp; state.owasp = state.owasp===id ? null : id; state.tab="findings"; renderRing(); renderTabs(); renderPanel(); }));
+  $("#ring-legend").innerHTML = state.owasp
+    ? `Showing ${esc(state.owasp)} ${esc(rep.owasp[state.owasp].title)} <button class="link" id="clear-owasp">Show all</button>`
+    : `Click a segment of the wheel to filter findings by OWASP risk.`;
+  const c=$("#clear-owasp"); if(c) c.onclick=()=>{ state.owasp=null; renderRing(); renderPanel(); };
+}
+function countUp(el, to, suffix){
+  if(reduceMotion){ el.innerHTML=to+suffix; return; }
+  const t0=performance.now(), d=1100; (function f(t){ const k=Math.min(1,(t-t0)/d), v=Math.round(to*(1-Math.pow(1-k,3))); el.innerHTML=v+suffix; if(k<1) requestAnimationFrame(f); })(t0);
+}
+function renderMeters(){
+  const r=state.report, s=r.summary, sec=r.security, m=r.malware;
+  countUp($("#score-big"), sec.score, "<small>/100</small>");
+  $("#score-big").style.color = {A:"var(--ok)",B:"var(--low)",C:"var(--med)",D:"var(--high)",F:"var(--crit)"}[sec.grade];
+  $("#score-sub").textContent = sec.score>=85 ? "Solid. Only minor issues found." : sec.score>=55 ? "Some issues worth fixing before release." : "Serious weaknesses. Fix the critical and high items first.";
+  $("#mal-verdict").innerHTML = `${esc(m.label)} <span style="color:var(--muted);font-weight:700">${m.score}/100</span>`;
+  $("#mal-verdict").style.color = {clean:"var(--ok)",low:"var(--low)",suspicious:"var(--med)",malicious:"var(--crit)"}[m.verdict];
+  setTimeout(()=>$("#mal-pin").style.left=`calc(${Math.min(99,m.score)}% - 1px)`, 60);
+  $("#sev-title").textContent = `${s.total} finding${s.total===1?"":"s"}`;
+  $("#sevbar").innerHTML = SEV.filter(k=>s[k.toLowerCase()]).map(k=>`<i style="flex-grow:${s[k.toLowerCase()]};background:${SEVC[k]}" title="${k}: ${s[k.toLowerCase()]}"></i>`).join("") || `<i style="flex-grow:1;background:var(--ok)"></i>`;
+  $("#sevcounts").innerHTML = SEV.map(k=>`<button data-sev="${k}" class="${state.sev.has(k)?"active":""}" aria-pressed="${state.sev.has(k)}"><span class="dot" style="background:${SEVC[k]}"></span><b>${s[k.toLowerCase()]}</b>${k}</button>`).join("");
+  document.querySelectorAll("#sevcounts button").forEach(b=>b.onclick=()=>{ toggleSev(b.dataset.sev); });
+  const st=r.stats||{};
+  const facts=[["Target / min SDK",`${r.target_sdk} / ${r.min_sdk}`],["Size",`${r.file_size_mb} MB`],["Code",`${(st.classes||0).toLocaleString()} classes in ${st.dex_files||0} DEX`],["Scan time",`${r.scan_metadata.scan_time_seconds}s`],
+    ["Frameworks",(r.frameworks||[]).join(", ")||"–"],["Trackers",(r.trackers||[]).length],["Signature",["v1","v2","v3","v4"].filter(v=>r.signing&&r.signing[v]).join(" + ")||"unsigned"],["SHA-256",`<code style="font:12px var(--mono)">${esc((r.file_hash_sha256||"").slice(0,16))}…</code>`]];
+  $("#facts").innerHTML = facts.map(([k,v])=>`<div><dt>${k}</dt><dd>${typeof v==="string"&&v.startsWith("<code")?v:esc(v)}</dd></div>`).join("");
+}
+function toggleSev(k){ state.sev.has(k)?state.sev.delete(k):state.sev.add(k); state.tab="findings"; renderMeters(); renderTabs(); renderPanel(); }
+
+const TABS = [
+  ["findings","Findings", r=>r.summary.total],
+  ["malware","Malware", r=>r.malware.signals.length+r.malware.capabilities.length],
+  ["permissions","Permissions", r=>(r.permissions||[]).length],
+  ["components","Components", r=>(r.components||[]).length],
+  ["network","Network", r=>(r.domains||[]).length],
+  ["secrets","Secrets", r=>(r.secrets||[]).length],
+  ["signing","Certificate", r=>(r.signing&&r.signing.certificates||[]).length],
+  ["sdk","SDKs & defences", r=>(r.trackers||[]).length+(r.security_controls||[]).length],
+  ["owasp","OWASP coverage", r=>10],
+];
+function renderTabs(){
+  const r=state.report;
+  $("#tabs").innerHTML = TABS.map(([k,l,n])=>`<button class="tab" role="tab" id="tab-${k}" aria-controls="panel" aria-selected="${state.tab===k}" data-tab="${k}">${l}<span class="n">${n(r)}</span></button>`).join("");
+  document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ state.tab=b.dataset.tab; renderTabs(); renderPanel(); });
+  $("#tabs").onkeydown=e=>{ if(!["ArrowRight","ArrowLeft"].includes(e.key)) return; const i=TABS.findIndex(t=>t[0]===state.tab); const n=TABS[(i+(e.key==="ArrowRight"?1:TABS.length-1))%TABS.length][0]; state.tab=n; renderTabs(); renderPanel(); $("#tab-"+n).focus(); };
+}
+function renderPanel(){
+  const fn={findings:pFindings,malware:pMalware,permissions:pPerms,components:pComps,network:pNetwork,secrets:pSecrets,signing:pSigning,sdk:pSdk,owasp:pOwasp}[state.tab];
+  $("#panels").innerHTML=`<div class="tabpanel" id="panel" role="tabpanel" aria-labelledby="tab-${state.tab}">${fn(state.report)}</div>`;
+  if(state.tab==="findings") bindFindings();
+}
+
+function findingsFiltered(){
+  const q=state.q.toLowerCase();
+  return state.report.vulnerabilities.filter(v=>(!state.sev.size||state.sev.has(v.severity)) && (!state.owasp||v.owasp_id===state.owasp) && (!state.hideLib||!v.in_library)
+    && (!q || [v.title,v.description,v.evidence,v.cwe,v.id,(v.locations||[]).join(" ")].join(" ").toLowerCase().includes(q)));
+}
+function pFindings(r){
+  return `<div class="filters">
+    <input class="search" id="q" type="search" placeholder="Search findings, classes, CWE…" value="${esc(state.q)}" aria-label="Search findings">
+    ${SEV.map(k=>`<button class="chip" data-chip="${k}" aria-pressed="${state.sev.has(k)}"><span class="dot" style="background:${SEVC[k]}"></span>${k}</button>`).join("")}
+    <label class="toggle"><input type="checkbox" id="hidelib" ${state.hideLib?"checked":""}> Hide library-only findings</label>
+    <button class="chip" id="expand-all">Expand all</button>
+  </div><div id="flist">${listHTML()}</div>`;
+}
+function listHTML(){
+  const items=findingsFiltered();
+  if(!state.report.vulnerabilities.length) return `<div class="empty"><b>Nothing found</b>No issues matched our rules. Static analysis can't see code that is downloaded or unpacked at runtime.</div>`;
+  if(!items.length) return `<div class="empty"><b>No matches</b>Clear a filter to see more findings.</div>`;
+  return items.map(v=>`<details class="finding" style="--c:${SEVC[v.severity]}">
+    <summary><span class="sev">${v.severity}</span><span class="f-title">${esc(v.title)}</span>
+      <span class="f-meta"><span class="tag o" title="${esc(v.owasp_title)}">${v.owasp_id}</span><span class="tag">${esc(v.cwe)}</span><span class="tag" title="Confidence">${v.confidence} confidence</span>${v.in_library?`<span class="tag lib">library</span>`:""}</span></summary>
+    <div class="f-body">
+      <p>${esc(v.description)}</p>
+      ${v.evidence?`<div><h4>Evidence</h4><pre class="code">${esc(v.evidence)}</pre></div>`:""}
+      ${(v.locations||[]).length?`<div><h4>Where in the code (${v.locations.length})</h4><pre class="code">${esc(v.locations.slice(0,25).join("\n"))}${v.locations.length>25?"\n…":""}</pre></div>`:""}
+      <div><h4>How to fix</h4><pre class="code">${esc(v.remediation)}</pre></div>
+      <div class="refs"><h4>${esc(v.owasp)} · ${esc(v.masvs)} · rule ${esc(v.id)}</h4>${(v.references||[]).map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join("")}</div>
+    </div></details>`).join("");
+}
+function bindFindings(){
+  const q=$("#q"); q.oninput=()=>{ state.q=q.value; $("#flist").innerHTML=listHTML(); };
+  document.querySelectorAll("[data-chip]").forEach(b=>b.onclick=()=>toggleSev(b.dataset.chip));
+  $("#hidelib").onchange=e=>{ state.hideLib=e.target.checked; $("#flist").innerHTML=listHTML(); };
+  $("#expand-all").onclick=e=>{ const all=[...document.querySelectorAll(".finding")]; const open=!all.every(d=>d.open); all.forEach(d=>d.open=open); e.target.textContent=open?"Collapse all":"Expand all"; };
+}
+function pMalware(r){
+  const m=r.malware;
+  const sig = m.signals.length ? `<ul class="list">${m.signals.map(s=>`<li><span class="w">+${s.weight}</span><span>${esc(s.label)}${(s.evidence||[]).length?`<span class="ev">${esc(s.evidence.join(" | "))}</span>`:""}</span></li>`).join("")}</ul>` : `<p class="sub">No malware patterns were matched.</p>`;
+  const caps = m.capabilities.length ? `<ul class="list">${m.capabilities.map(c=>`<li><span class="w cap">${c.weight||"·"}</span><span>${esc(c.label)}${(c.evidence||[]).length?`<span class="ev">${esc(c.evidence.slice(0,3).join(" | "))}</span>`:""}</span></li>`).join("")}</ul>` : `<p class="sub">No sensitive capabilities detected.</p>`;
+  return `<div class="grid2">
+    <div class="panel"><h3>Signals</h3><p class="sub">Patterns typical of malware families. The number is each signal's weight in the score.</p>${sig}</div>
+    <div class="panel"><h3>Capabilities</h3><p class="sub">What the app is able to do. Not bad on its own, but risky in combination.</p>${caps}</div>
+  </div>
+  <p class="sub" style="margin-top:18px">${esc(m.note)} Look up this file on <a href="https://www.virustotal.com/gui/file/${esc(r.file_hash_sha256)}" target="_blank" rel="noopener">VirusTotal</a>.</p>
+  ${(r.packers||[]).length?`<p>Packer detected: <b>${esc(r.packers.join(", "))}</b>. Static results only cover the unpacking stub.</p>`:""}`;
+}
+function pPerms(r){
+  const p=r.permissions||[]; if(!p.length) return `<div class="empty"><b>No permissions</b>The app requests no permissions.</div>`;
+  const by=l=>p.filter(x=>x.level===l).length;
+  return `<p class="sub">${p.length} requested: ${by("dangerous")} dangerous (runtime), ${by("special")} special access, ${by("signature")} system-only, ${by("custom")} custom.</p>
+  <div class="tscroll"><table class="t"><thead><tr><th>Permission</th><th>Level</th><th>What it allows</th><th>Risk</th></tr></thead><tbody>
+  ${p.map(x=>`<tr><td><b>${esc(x.short)}</b><br><span style="color:var(--faint);font-size:12px">${esc(x.name)}</span></td><td><span class="lvl ${esc(x.level)}">${esc(x.level)}</span></td><td>${esc(x.description||"–")}</td><td><span class="riskbar"><i style="width:${x.risk*10}%;background:${x.risk>=7?"var(--crit)":x.risk>=4?"var(--high)":"var(--low)"}"></i></span></td></tr>`).join("")}
+  </tbody></table></div>`;
+}
+function pComps(r){
+  const cs=r.components||[], sm=r.component_summary||{};
+  const cards=["activity","service","receiver","provider"].map(t=>`<div class="panel"><h3>${t[0].toUpperCase()+t.slice(1)}s</h3><div class="big" style="font-size:56px">${sm[t]?.total||0}</div><p class="sub" style="margin:6px 0 0">${sm[t]?.exported||0} exported</p></div>`).join("");
+  const rows=cs.slice().sort((a,b)=>(b.exported-a.exported)).map(c=>{
+    const prot = c.type==="provider" ? (c.read_permission||c.permission||"") : (c.permission||"");
+    const acts=[...new Set((c.filters||[]).flatMap(f=>f.actions))].slice(0,3).join(", ");
+    return `<tr><td>${esc(c.type)}</td><td style="font:12.5px var(--mono)">${esc(c.name)}${c.is_launcher?` <span class="tag">launcher</span>`:""}</td><td>${c.exported?`<b style="color:var(--high)">yes</b><br><span style="color:var(--faint);font-size:12px">${esc(c.exported_reason)}</span>`:"no"}</td><td style="font-size:12.5px">${esc(prot)||"–"}</td><td style="font-size:12.5px;color:var(--muted)">${esc(acts)}</td></tr>`; }).join("");
+  const links=(r.deep_links||[]);
+  return `<div class="grid2" style="grid-template-columns:repeat(4,minmax(0,1fr))">${cards}</div>
+  ${links.length?`<div class="panel" style="margin-top:22px"><h3>Deep links</h3><p class="sub">URLs that open this app from a browser or another app.</p><ul class="list">${links.map(l=>`<li><span style="font:13px var(--mono)">${esc(l.uri)}</span><span style="color:var(--faint);font-size:13px">${esc(l.component)}${l.verified?" (verified)":""}</span></li>`).join("")}</ul></div>`:""}
+  <div class="tscroll" style="margin-top:22px"><table class="t"><thead><tr><th>Type</th><th>Name</th><th>Exported</th><th>Permission</th><th>Intent actions</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function pNetwork(r){
+  const d=r.domains||[], nsc=r.network_security_config;
+  const nscHTML = nsc ? `<dl class="kv"><dt>File</dt><dd><code>${esc(nsc.file)}</code></dd><dt>Cleartext (global)</dt><dd>${nsc.cleartext_base?"allowed":"not allowed"}</dd><dt>Cleartext domains</dt><dd>${esc((nsc.cleartext_domains||[]).join(", ")||"none")}</dd><dt>User CAs trusted</dt><dd>${nsc.user_ca?"yes":"no"}</dd><dt>Pin-sets</dt><dd>${(nsc.pins||[]).length}</dd></dl>` : `<p class="sub">No network security config. The platform defaults for API ${esc(r.target_sdk)} apply.</p>`;
+  return `<div class="panel" style="margin-bottom:22px"><h3>Network security config</h3>${nscHTML}</div>
+  ${d.length?`<div class="tscroll"><table class="t"><thead><tr><th>Host</th><th>Schemes</th><th>Refs</th><th>Flags</th><th>Example</th></tr></thead><tbody>
+  ${d.map(x=>`<tr><td><b>${esc(x.host)}</b></td><td>${x.schemes.map(s=>`<span class="tag" style="${/^(http|ws)$/.test(s)?"color:var(--high);border-color:var(--high)":""}">${esc(s)}</span>`).join(" ")}</td><td>${x.count}</td><td>${x.flags.map(f=>`<span class="tag" style="color:var(--crit);border-color:var(--crit)">${esc(f)}</span>`).join(" ")}</td><td style="font:12px var(--mono);color:var(--muted)">${esc((x.samples||[])[0]||"")}</td></tr>`).join("")}
+  </tbody></table></div>`:`<div class="empty"><b>No endpoints</b>No URLs were found in code or resources.</div>`}`;
+}
+function pSecrets(r){
+  const s=r.secrets||[]; if(!s.length) return `<div class="empty"><b>No secrets found</b>None of the 30+ known key formats appeared in code, resources or assets.</div>`;
+  return `<p class="sub">Values are masked. Rotate anything real, since everything inside an APK is public.</p><div class="tscroll"><table class="t"><thead><tr><th>Severity</th><th>Type</th><th>Value</th><th>Found in</th></tr></thead><tbody>
+  ${s.map(x=>`<tr><td><span class="sev" style="--c:${SEVC[x.severity]};color:${SEVC[x.severity]}">${esc(x.severity)}</span></td><td>${esc(x.type)}</td><td style="font:12.5px var(--mono)">${esc(x.value)}</td><td style="font-size:13px;color:var(--muted)">${esc((x.sources||[]).join(", "))}</td></tr>`).join("")}
+  </tbody></table></div>`;
+}
+function pSigning(r){
+  const s=r.signing||{}, c=(s.certificates||[])[0];
+  const schemes=["v1","v2","v3","v4"].map(v=>`<span class="scheme"><span class="dot" style="background:${s[v]?"var(--ok)":"rgba(147,167,214,.3)"}"></span>${v} ${s[v]?"signed":"absent"}</span>`).join("");
+  return `<div class="panel"><h3>Signature schemes</h3><p style="margin:10px 0 18px">${schemes}</p>
+  ${c?`<dl class="kv"><dt>Subject</dt><dd>${esc(c.subject)}</dd><dt>Issuer</dt><dd>${esc(c.issuer)}${c.self_signed?" (self-signed)":""}</dd><dt>Valid</dt><dd>${esc((c.not_before||"").slice(0,10))} to ${esc((c.not_after||"").slice(0,10))}${c.expired?` <b style="color:var(--crit)">expired</b>`:""}</dd><dt>Public key</dt><dd>${esc(c.public_key)}</dd><dt>Signature hash</dt><dd>${esc(c.signature_algorithm)}</dd><dt>Serial</dt><dd><code>${esc(c.serial)}</code></dd><dt>SHA-256</dt><dd><code>${esc(c.sha256)}</code></dd><dt>SHA-1</dt><dd><code>${esc(c.sha1)}</code></dd></dl>`:`<p class="sub">No certificate could be read.</p>`}</div>
+  <div class="panel" style="margin-top:22px"><h3>File hashes</h3><dl class="kv"><dt>MD5</dt><dd><code>${esc(r.hashes?.md5)}</code></dd><dt>SHA-1</dt><dd><code>${esc(r.hashes?.sha1)}</code></dd><dt>SHA-256</dt><dd><code>${esc(r.hashes?.sha256)}</code></dd></dl></div>`;
+}
+const CONTROL_LABEL={root_detection:"Root detection",play_integrity:"Play Integrity / SafetyNet",debugger_detection:"Debugger detection",biometric:"Biometric authentication",keystore:"Android Keystore keys",encrypted_prefs:"Encrypted SharedPreferences",cert_pinning:"Certificate pinning",sqlcipher:"SQLCipher database",flag_secure:"Screenshot blocking (FLAG_SECURE)",emulator_detection:"Emulator detection"};
+function pSdk(r){
+  const ctrl=r.security_controls||[], tr=r.trackers||[], nat=r.native||{}, ob=r.obfuscation;
+  const allCtrl=Object.keys(CONTROL_LABEL);
+  return `<div class="grid2">
+    <div class="panel"><h3>Defences detected</h3><p class="sub">Protections found in the code. More is better for apps handling money or personal data.</p>
+      ${allCtrl.map(k=>{const on=ctrl.find(c=>c.key===k); return `<span class="pill ${on?"on":""}" title="${esc(on?on.evidence.join("; "):"not found")}">${on?"✓ ":""}${CONTROL_LABEL[k]}</span>`;}).join("")}
+      ${ob&&ob.ratio!==null?`<p class="sub" style="margin-top:14px">Obfuscation: ${Math.round(ob.ratio*100)}% of ${ob.app_classes} app classes have minified names.</p>`:""}
     </div>
-
-    <!-- History Tab -->
-    <div id="historyTab" class="container" style="display: none;">
-        <div class="screen-title">Scan History</div>
-        <div class="screen-subtitle">View your previous APK security scans (Last 10 scans)</div>
-        
-        <div id="historyContainer"></div>
+    <div class="panel"><h3>Trackers</h3><p class="sub">Third-party SDKs that collect analytics, ads or profiling data.</p>
+      ${tr.length?`<ul class="list">${tr.map(t=>`<li><b>${esc(t.name)}</b><span style="color:var(--muted)">${esc(t.category)}</span></li>`).join("")}</ul>`:`<p>No known trackers found.</p>`}
     </div>
+    <div class="panel"><h3>Built with</h3><p>${(r.frameworks||[]).map(f=>`<span class="pill">${esc(f)}</span>`).join("")}</p>
+      ${(r.packers||[]).length?`<p><b style="color:var(--high)">Packer:</b> ${esc(r.packers.join(", "))}</p>`:""}
+      ${(r.payloads||[]).length?`<p><b style="color:var(--crit)">Hidden payloads:</b><br>${r.payloads.map(p=>`<code style="font:12px var(--mono)">${esc(p.path)}</code> ${esc(p.kind)}`).join("<br>")}</p>`:""}</div>
+    <div class="panel"><h3>Native libraries</h3><p class="sub">${nat.count||0} libraries${(nat.abis||[]).length?` for ${esc(nat.abis.join(", "))}`:""}</p>
+      ${(nat.libraries||[]).length?`<pre class="code">${esc(nat.libraries.join("\n"))}</pre>`:""}</div>
+  </div>`;
+}
+function pOwasp(r){
+  return `<div class="tscroll"><table class="t"><thead><tr><th>Risk</th><th>What it covers</th><th>Findings</th></tr></thead><tbody>
+  ${Object.values(r.owasp).map(o=>`<tr><td><b style="font:800 20px var(--display);color:${o.count?SEVHEX[o.worst]:"var(--ok)"}">${o.id}</b> <a href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.title)}</a></td><td style="color:var(--muted)">${esc(o.summary)}</td><td>${o.count?`<button class="link" data-goto="${o.id}">${o.count}, worst ${esc(o.worst)}</button>`:`<span style="color:var(--ok)">clear</span>`}</td></tr>`).join("")}
+  </tbody></table></div>
+  <h3 style="font:800 24px var(--display);margin:28px 0 10px">MASVS control groups</h3>
+  <div class="tscroll"><table class="t"><tbody>${Object.values(r.masvs).map(m=>`<tr><td><b>${esc(m.id)}</b></td><td style="color:var(--muted)">${esc(m.title)}</td><td>${m.count}</td></tr>`).join("")}</tbody></table></div>`;
+}
+document.addEventListener("click", e=>{ const g=e.target.closest("[data-goto]"); if(g){ state.owasp=g.dataset.goto; state.tab="findings"; renderRing(); renderTabs(); renderPanel(); $("#tabs").scrollIntoView({behavior:reduceMotion?"auto":"smooth"}); } });
 
-    <!-- Documentation Tab -->
-    <div id="documentationTab" class="container" style="display: none;">
-        <div class="screen-title">Documentation</div>
-        <div class="screen-subtitle">Learn how to use APK Security Scanner effectively</div>
-        
-        <div style="display: grid; gap: 1.5rem;">
-            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent-primary);">
-                <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">Getting Started</h3>
-                <p style="color: var(--text-secondary); line-height: 1.8;">
-                    Upload your APK file using the Scanner tab. The tool supports APK files up to 300MB in size. 
-                    Once uploaded, click "Start Security Scan" to begin the comprehensive analysis.
-                </p>
-            </div>
-            
-            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent-warning);">
-                <h3 style="color: var(--accent-warning); margin-bottom: 1rem;">Understanding Results</h3>
-                <p style="color: var(--text-secondary); line-height: 1.8;">
-                    Vulnerabilities are classified into four severity levels: Critical (immediate action required), 
-                    High (urgent fixes needed), Medium (should be addressed), and Low (recommended improvements). 
-                    Each vulnerability includes OWASP and CWE references for detailed understanding.
-                </p>
-                <p style="color: var(--text-secondary); line-height: 1.8; margin-top: 1rem;">
-                    Learn more: <a href="https://owasp.org/www-project-mobile-top-10/" target="_blank" style="color: var(--accent-primary); text-decoration: none; font-weight: 600;">OWASP Mobile Top 10</a>
-                </p>
-            </div>
-            
-            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent-success);">
-                <h3 style="color: var(--accent-success); margin-bottom: 1rem;">Exporting Reports</h3>
-                <p style="color: var(--text-secondary); line-height: 1.8;">
-                    Export your scan results in multiple formats including JSON (for programmatic processing), 
-                    HTML (for viewing in browsers), CSV (for spreadsheet analysis), and PDF (for sharing with stakeholders).
-                </p>
-            </div>
-            
-            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent-secondary);">
-                <h3 style="color: var(--accent-secondary); margin-bottom: 1rem;">Best Practices</h3>
-                <p style="color: var(--text-secondary); line-height: 1.8;">
-                    Regularly scan your APK files during development cycles. Address critical and high severity 
-                    vulnerabilities immediately. Use the detailed remediation steps provided for each finding. 
-                    Keep your development tools and libraries updated to minimize security risks.
-                </p>
-            </div>
-        </div>
-    </div>
+/* ---------------- exports & history ---------------- */
+function download(name, data, type){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([data],{type})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000); }
+$("#exp-json").onclick=()=>{ const r=state.report; download(`${r.package_name}_xray.json`, JSON.stringify(r,null,2), "application/json"); toast("JSON report downloaded"); };
+$("#exp-sarif").onclick=()=>{ if(state.jobId) location.href=`/api/report/${state.jobId}.sarif`; };
+$("#exp-print").onclick=()=>{ document.querySelectorAll(".finding").forEach(d=>d.open=true); window.print(); };
 
-    <!-- Settings Tab -->
-    <div id="settingsTab" class="container" style="display: none;">
-        <div class="screen-title">Settings</div>
-        <div class="screen-subtitle">Configure your scanner preferences</div>
-        
-        <div style="display: grid; gap: 1.5rem;">
-            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px;">
-                <h3 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Scan Options</h3>
-                <div style="display: grid; gap: 1rem;">
-                    <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-                        <input type="checkbox" checked style="width: 20px; height: 20px;">
-                        <span style="color: var(--text-secondary);">Enable deep code analysis</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-                        <input type="checkbox" checked style="width: 20px; height: 20px;">
-                        <span style="color: var(--text-secondary);">Check for malicious permissions</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-                        <input type="checkbox" checked style="width: 20px; height: 20px;">
-                        <span style="color: var(--text-secondary);">Analyze third-party libraries</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-                        <input type="checkbox" style="width: 20px; height: 20px;">
-                        <span style="color: var(--text-secondary);">Generate detailed technical report</span>
-                    </label>
-                </div>
-            </div>
-            
-            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px;">
-                <h3 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Display Settings</h3>
-                <div style="display: grid; gap: 1rem;">
-                    <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-                        <input type="checkbox" id="highContrastToggle" style="width: 20px; height: 20px;" onchange="toggleHighContrast()">
-                        <span style="color: var(--text-secondary);">High contrast mode</span>
-                    </label>
-                </div>
-            </div>
-            
-            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px;">
-                <h3 style="color: var(--accent-primary); margin-bottom: 1.5rem;">About</h3>
-                <div style="color: var(--text-secondary); line-height: 1.8;">
-                    <p style="margin-bottom: 0.5rem;"><strong>Version:</strong> 2.0.0</p>
-                    <p style="margin-bottom: 0.5rem;"><strong>Last Updated:</strong> February 2026</p>
-                    <p style="margin-bottom: 0.5rem;"><strong>Max File Size:</strong> 300MB</p>
-                    <p style="margin-bottom: 1rem;"><strong>Supported Formats:</strong> .apk</p>
-                    <p style="font-size: 0.9rem; color: var(--text-muted);">
-                        APK Security Scanner performs comprehensive security analysis including OWASP Mobile Top 10 
-                        vulnerabilities, CWE mappings, and custom security checks.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="notification" id="notification">
-        <div class="notification-icon" id="notificationIcon">✓</div>
-        <div id="notificationText"></div>
-    </div>
-
-    <script>
-        let uploadedFile = null;
-        let scanResults = null;
-        let charts = {};
-        let currentScanInterval = null;
-        let currentAbortController = null;
-
-        // Initialize
-        document.getElementById('uploadZone').addEventListener('click', () => {
-            document.getElementById('fileInput').click();
-        });
-
-        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
-
-        // Drag and drop
-        const uploadZone = document.getElementById('uploadZone');
-        uploadZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadZone.classList.add('dragover');
-        });
-
-        uploadZone.addEventListener('dragleave', () => {
-            uploadZone.classList.remove('dragover');
-        });
-
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0 && files[0].name.endsWith('.apk')) {
-                handleFileSelect({ target: { files: files } });
-            }
-        });
-
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file || !file.name.endsWith('.apk')) {
-                showNotification('Please select a valid APK file', 'error');
-                return;
-            }
-
-            uploadedFile = file;
-            document.getElementById('fileName').textContent = file.name;
-            document.getElementById('fileSize').textContent = `Size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
-            document.getElementById('fileInfo').classList.add('active');
-            document.getElementById('startScanBtn').disabled = false;
-            showNotification('APK file loaded successfully', 'success');
-        }
-
-        async function startScan() {
-            if (!uploadedFile) return;
-
-            document.getElementById('uploadScreen').classList.add('hidden');
-            document.getElementById('scanningScreen').classList.remove('hidden');
-
-            // Reset all steps
-            const steps = ['step1', 'step2', 'step3', 'step4'];
-            steps.forEach(step => {
-                document.getElementById(step).classList.remove('completed', 'active');
-            });
-            document.getElementById('step1').classList.add('active');
-
-            // Animate progress steps
-            let stepIndex = 0;
-            
-            currentScanInterval = setInterval(() => {
-                if (stepIndex < steps.length) {
-                    document.getElementById(steps[stepIndex]).classList.add('completed');
-                    if (stepIndex < steps.length - 1) {
-                        document.getElementById(steps[stepIndex + 1]).classList.add('active');
-                    }
-                    stepIndex++;
-                }
-            }, 800);
-
-            try {
-                // Create abort controller for cancellation
-                currentAbortController = new AbortController();
-                
-                // Perform real analysis by calling backend API
-                const results = await analyzeAPK(uploadedFile);
-                
-                clearInterval(currentScanInterval);
-                currentScanInterval = null;
-                
-                // Mark all steps as complete
-                steps.forEach(step => {
-                    document.getElementById(step).classList.add('completed');
-                });
-                
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                scanResults = results;
-                
-                // Save to history
-                saveScanToHistory(results);
-                
-                displayResults(results);
-            } catch (error) {
-                clearInterval(currentScanInterval);
-                currentScanInterval = null;
-                
-                if (error.name === 'AbortError') {
-                    // Scan was cancelled
-                    document.getElementById('scanningScreen').classList.add('hidden');
-                    document.getElementById('uploadScreen').classList.remove('hidden');
-                    showNotification('Scan cancelled', 'error');
-                } else {
-                    document.getElementById('scanningScreen').classList.add('hidden');
-                    document.getElementById('uploadScreen').classList.remove('hidden');
-                    showNotification(`Scan failed: ${error.message}`, 'error');
-                }
-            }
-        }
-
-        async function analyzeAPK(file) {
-            // THIS IS THE FIXED FUNCTION - CALLS THE REAL BACKEND
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const response = await fetch('/analyze', {
-                    method: 'POST',
-                    body: formData,
-                    signal: currentAbortController.signal
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || `Server error: ${response.status}`);
-                }
-
-                const results = await response.json();
-                
-                // Transform the backend response to match the frontend format
-                const transformedResults = {
-                    metadata: {
-                        fileName: file.name,
-                        fileSize: file.size,
-                        scanDate: results.scanDate || new Date().toISOString(),
-                    },
-                    summary: {
-                        total_vulnerabilities: results.summary?.total || 0,
-                        critical: results.summary?.critical || 0,
-                        high: results.summary?.high || 0,
-                        medium: results.summary?.medium || 0,
-                        low: results.summary?.low || 0,
-                        info: results.summary?.info || 0
-                    },
-                    vulnerabilities: (results.vulnerabilities || []).map((v, index) => ({
-                        id: index + 1,
-                        severity: v.severity?.toLowerCase() || 'low',
-                        title: v.type || 'Unknown Vulnerability',
-                        owasp: v.owasp || 'N/A',
-                        cwe: v.cwe || 'N/A',
-                        location: v.location || v.category || 'Unknown',
-                        description: v.details || v.description || 'No description available',
-                        evidence: v.evidence || '',
-                        impact: v.impact || '',
-                        remediation: v.remediation || 'Remediation steps not specified'
-                    })),
-                    app_info: {
-                        app_name: results.app_name,
-                        package_name: results.package_name,
-                        version_name: results.version_name,
-                        version_code: results.version_code,
-                        min_sdk: results.min_sdk,
-                        target_sdk: results.target_sdk,
-                        file_hash_sha256: results.file_hash_sha256,
-                        file_size_mb: results.file_size_mb
-                    },
-                    malware_info: {
-                        detected: results.malware_detected || false,
-                        confidence: results.malware_confidence || 'None',
-                        indicators: results.malware_indicators || []
-                    },
-                    overall_risk_score: results.overall_risk_score || 0
-                };
-
-                // Group vulnerabilities by type to consolidate duplicates
-                transformedResults.vulnerabilities = groupVulnerabilitiesByType(transformedResults.vulnerabilities);
-
-                // Recalculate summary counts after grouping
-                const groupedSummary = {
-                    critical: 0,
-                    high: 0,
-                    medium: 0,
-                    low: 0,
-                    info: 0
-                };
-                
-                transformedResults.vulnerabilities.forEach(v => {
-                    const severity = v.severity.toLowerCase();
-                    if (groupedSummary.hasOwnProperty(severity)) {
-                        groupedSummary[severity]++;
-                    }
-                });
-                
-                groupedSummary.total_vulnerabilities = transformedResults.vulnerabilities.length;
-                transformedResults.summary = groupedSummary;
-
-                return transformedResults;
-                
-            } catch (error) {
-                console.error('Analysis error:', error);
-                throw error;
-            }
-        }
-
-        function groupVulnerabilitiesByType(vulnerabilities) {
-            const grouped = {};
-            
-            vulnerabilities.forEach(vuln => {
-                // Create a unique key based on vulnerability characteristics
-                const key = `${vuln.title}_${vuln.severity}_${vuln.owasp}_${vuln.cwe}`;
-                
-                if (!grouped[key]) {
-                    // First occurrence - create new entry with locations array
-                    grouped[key] = {
-                        ...vuln,
-                        locations: [vuln.location],
-                        evidences: vuln.evidence ? [vuln.evidence] : []
-                    };
-                } else {
-                    // Duplicate found - add location to existing entry
-                    if (!grouped[key].locations.includes(vuln.location)) {
-                        grouped[key].locations.push(vuln.location);
-                    }
-                    if (vuln.evidence && !grouped[key].evidences.includes(vuln.evidence)) {
-                        grouped[key].evidences.push(vuln.evidence);
-                    }
-                }
-            });
-            
-            // Convert back to array and update IDs
-            return Object.values(grouped).map((vuln, index) => ({
-                ...vuln,
-                id: index + 1,
-                location: vuln.locations.join(', ') // Keep backward compatibility
-            }));
-        }
-
-        function displayResults(results) {
-            document.getElementById('scanningScreen').classList.add('hidden');
-            document.getElementById('resultsScreen').classList.remove('hidden');
-            document.getElementById('resultsFileName').textContent = `Analysis complete for ${results.metadata.fileName}`;
-
-            // Display summary cards
-            const summaryHTML = `
-                <div class="summary-card critical">
-                    <div class="summary-number">${results.summary.critical}</div>
-                    <div class="summary-label">Critical</div>
-                </div>
-                <div class="summary-card high">
-                    <div class="summary-number">${results.summary.high}</div>
-                    <div class="summary-label">High</div>
-                </div>
-                <div class="summary-card medium">
-                    <div class="summary-number">${results.summary.medium}</div>
-                    <div class="summary-label">Medium</div>
-                </div>
-                <div class="summary-card low">
-                    <div class="summary-number">${results.summary.low}</div>
-                    <div class="summary-label">Low</div>
-                </div>
-            `;
-            document.getElementById('resultsSummary').innerHTML = summaryHTML;
-
-            // Create charts
-            createCharts(results);
-
-            // Prepare vulnerabilities for display
-            displayVulnerabilities(results.vulnerabilities, 'vulnerabilitiesList');
-            displayVulnerabilities(results.vulnerabilities.filter(v => v.severity === 'critical'), 'vulnerabilitiesCritical');
-            displayVulnerabilities(results.vulnerabilities.filter(v => v.severity === 'high'), 'vulnerabilitiesHigh');
-            displayVulnerabilities(results.vulnerabilities.filter(v => v.severity === 'medium'), 'vulnerabilitiesMedium');
-            displayVulnerabilities(results.vulnerabilities.filter(v => v.severity === 'low'), 'vulnerabilitiesLow');
-
-            showNotification('Analysis completed successfully', 'success');
-        }
-
-        function displayVulnerabilities(vulnerabilities, containerId) {
-            const container = document.getElementById(containerId);
-            if (vulnerabilities.length === 0) {
-                container.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">No vulnerabilities found in this category</div>';
-                return;
-            }
-
-            const vulnHTML = vulnerabilities.map((vuln, index) => `
-                <div class="vulnerability-card ${vuln.severity}" onclick="this.classList.toggle('expanded')" style="animation-delay: ${index * 0.1}s">
-                    <div class="vulnerability-header">
-                        <div>
-                            <div class="vulnerability-title">${vuln.title}</div>
-                            <div class="vulnerability-meta">
-                                <span class="meta-tag">${vuln.owasp}</span>
-                                <span class="meta-tag">${vuln.cwe}</span>
-                                ${vuln.locations && vuln.locations.length > 1 ? 
-                                    `<span class="meta-tag" style="background: var(--accent-primary); color: var(--bg-primary);">${vuln.locations.length} locations</span>` :
-                                    `<span class="meta-tag">${vuln.location}</span>`
-                                }
-                            </div>
-                        </div>
-                        <div class="severity-badge ${vuln.severity}">${vuln.severity}</div>
-                    </div>
-                    <div class="vulnerability-description">${vuln.description}</div>
-                    <div class="vulnerability-details">
-                        ${vuln.locations && vuln.locations.length > 0 ? `
-                        <div class="detail-section">
-                            <div class="detail-title">Found in ${vuln.locations.length} Location${vuln.locations.length > 1 ? 's' : ''}</div>
-                            <ul style="margin: 0.5rem 0; padding-left: 1.5rem; color: var(--text-secondary);">
-                                ${vuln.locations.map(loc => `<li style="margin: 0.25rem 0;">${loc}</li>`).join('')}
-                            </ul>
-                        </div>
-                        ` : ''}
-                        ${vuln.evidences && vuln.evidences.length > 0 ? `
-                        <div class="detail-section">
-                            <div class="detail-title">Evidence${vuln.evidences.length > 1 ? 's' : ''}</div>
-                            ${vuln.evidences.map((ev, i) => `<div class="code-block" style="margin-bottom: 0.5rem;">${ev}</div>`).join('')}
-                        </div>
-                        ` : vuln.evidence ? `
-                        <div class="detail-section">
-                            <div class="detail-title">Evidence</div>
-                            <div class="code-block">${vuln.evidence}</div>
-                        </div>
-                        ` : ''}
-                        ${vuln.impact ? `
-                        <div class="detail-section">
-                            <div class="detail-title">Impact</div>
-                            <div class="vulnerability-description">${(vuln.impact || '').replace(/\n/g, '<br>')}</div>
-                        </div>
-                        ` : ''}
-                        <div class="detail-section">
-                            <div class="detail-title">Remediation</div>
-                            <div class="vulnerability-description">${(vuln.remediation || '').replace(/\n/g, '<br>')}</div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            container.innerHTML = vulnHTML;
-        }
-
-        function createCharts(results) {
-            // Destroy existing charts
-            Object.values(charts).forEach(chart => chart.destroy());
-            charts = {};
-
-            // Severity Distribution Chart
-            const severityCtx = document.getElementById('severityChart').getContext('2d');
-            charts.severity = new Chart(severityCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Critical', 'High', 'Medium', 'Low'],
-                    datasets: [{
-                        data: [
-                            results.summary.critical,
-                            results.summary.high,
-                            results.summary.medium,
-                            results.summary.low
-                        ],
-                        backgroundColor: [
-                            'rgba(239, 68, 68, 0.8)',
-                            'rgba(245, 158, 11, 0.8)',
-                            'rgba(0, 217, 255, 0.8)',
-                            'rgba(16, 185, 129, 0.8)'
-                        ],
-                        borderColor: [
-                            '#ef4444',
-                            '#f59e0b',
-                            '#00d9ff',
-                            '#10b981'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#e5e7eb',
-                                padding: 15,
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // OWASP Category Chart
-            const owaspCategories = {};
-            results.vulnerabilities.forEach(v => {
-                owaspCategories[v.owasp] = (owaspCategories[v.owasp] || 0) + 1;
-            });
-
-            const owaspCtx = document.getElementById('owaspChart').getContext('2d');
-            charts.owasp = new Chart(owaspCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(owaspCategories),
-                    datasets: [{
-                        label: 'Vulnerabilities',
-                        data: Object.values(owaspCategories),
-                        backgroundColor: 'rgba(0, 217, 255, 0.6)',
-                        borderColor: '#00d9ff',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                color: '#9ca3af',
-                                stepSize: 1
-                            },
-                            grid: {
-                                color: 'rgba(45, 55, 72, 0.5)'
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: '#9ca3af',
-                                maxRotation: 45,
-                                minRotation: 45
-                            },
-                            grid: {
-                                color: 'rgba(45, 55, 72, 0.5)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-
-            // Timeline Chart (Risk Score Over Time)
-            const timelineCtx = document.getElementById('timelineChart').getContext('2d');
-            charts.timeline = new Chart(timelineCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Initial', 'After Scan', 'Projected'],
-                    datasets: [{
-                        label: 'Risk Score',
-                        data: [75, results.summary.critical * 25 + results.summary.high * 15 + results.summary.medium * 10 + results.summary.low * 5, 30],
-                        borderColor: '#00d9ff',
-                        backgroundColor: 'rgba(0, 217, 255, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                color: '#9ca3af'
-                            },
-                            grid: {
-                                color: 'rgba(45, 55, 72, 0.5)'
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: '#9ca3af'
-                            },
-                            grid: {
-                                color: 'rgba(45, 55, 72, 0.5)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#e5e7eb'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // CWE Distribution Chart
-            const cweCategories = {};
-            results.vulnerabilities.forEach(v => {
-                cweCategories[v.cwe] = (cweCategories[v.cwe] || 0) + 1;
-            });
-
-            const cweCtx = document.getElementById('cweChart').getContext('2d');
-            charts.cwe = new Chart(cweCtx, {
-                type: 'polarArea',
-                data: {
-                    labels: Object.keys(cweCategories),
-                    datasets: [{
-                        data: Object.values(cweCategories),
-                        backgroundColor: [
-                            'rgba(239, 68, 68, 0.6)',
-                            'rgba(245, 158, 11, 0.6)',
-                            'rgba(0, 217, 255, 0.6)',
-                            'rgba(16, 185, 129, 0.6)',
-                            'rgba(124, 58, 237, 0.6)'
-                        ],
-                        borderColor: [
-                            '#ef4444',
-                            '#f59e0b',
-                            '#00d9ff',
-                            '#10b981',
-                            '#7c3aed'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#e5e7eb',
-                                padding: 10,
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        r: {
-                            ticks: {
-                                color: '#9ca3af',
-                                backdropColor: 'transparent'
-                            },
-                            grid: {
-                                color: 'rgba(45, 55, 72, 0.5)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function switchTab(tab) {
-            // Update tab buttons
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(`tab-${tab}`).classList.add('active');
-        }
-
-        function switchMainTab(tab) {
-            // Update nav-tab buttons
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-
-            // Hide all main sections
-            document.querySelector('.container').style.display = 'none';
-            document.getElementById('historyTab').style.display = 'none';
-            document.getElementById('documentationTab').style.display = 'none';
-            document.getElementById('settingsTab').style.display = 'none';
-
-            // Show selected section
-            if (tab === 'scanner') {
-                document.querySelector('.container').style.display = 'block';
-            } else if (tab === 'history') {
-                document.getElementById('historyTab').style.display = 'block';
-                loadScanHistory();
-            } else if (tab === 'documentation') {
-                document.getElementById('documentationTab').style.display = 'block';
-            } else if (tab === 'settings') {
-                document.getElementById('settingsTab').style.display = 'block';
-            }
-        }
-
-        // Navigation functions
-        function goToUploadScreen() {
-            document.getElementById('resultsScreen').classList.add('hidden');
-            document.getElementById('uploadScreen').classList.remove('hidden');
-        }
-
-        function goToResultsScreen() {
-            document.getElementById('vulnerabilitiesScreen').classList.add('hidden');
-            document.getElementById('resultsScreen').classList.remove('hidden');
-        }
-
-        function goToVulnerabilitiesScreen() {
-            document.getElementById('resultsScreen').classList.add('hidden');
-            document.getElementById('exportScreen').classList.add('hidden');
-            document.getElementById('vulnerabilitiesScreen').classList.remove('hidden');
-        }
-
-        function goToExportScreen() {
-            document.getElementById('vulnerabilitiesScreen').classList.add('hidden');
-            document.getElementById('exportScreen').classList.remove('hidden');
-        }
-
-        function exportReport(format) {
-            if (!scanResults) return;
-
-            let content, mimeType, filename, extension;
-
-            switch(format) {
-                case 'json':
-                    content = JSON.stringify(scanResults, null, 2);
-                    mimeType = 'application/json';
-                    extension = 'json';
-                    break;
-                case 'csv':
-                    content = convertToCSV(scanResults);
-                    mimeType = 'text/csv';
-                    extension = 'csv';
-                    break;
-                case 'html':
-                    content = convertToHTML(scanResults);
-                    mimeType = 'text/html';
-                    extension = 'html';
-                    break;
-                case 'pdf':
-                    // Generate HTML content for PDF
-                    const pdfHTML = convertToHTML(scanResults);
-                    
-                    // Open in new window and trigger print
-                    const printWindow = window.open('', '_blank');
-                    printWindow.document.write(pdfHTML);
-                    printWindow.document.close();
-                    
-                    // Wait for content to load, then trigger print
-                    printWindow.onload = function() {
-                        printWindow.print();
-                    };
-                    
-                    showNotification('Print dialog opened - Save as PDF to download', 'success');
-                    return;
-            }
-
-            const blob = new Blob([content], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            filename = `security_report_${scanResults.metadata.fileName.replace('.apk', '')}_${new Date().toISOString().split('T')[0]}.${extension}`;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            showNotification(`${format.toUpperCase()} report exported successfully`, 'success');
-        }
-
-        function convertToCSV(results) {
-            let csv = 'ID,Severity,Title,OWASP,CWE,Location,Description\n';
-            results.vulnerabilities.forEach(v => {
-                csv += `${v.id},"${v.severity}","${v.title}","${v.owasp}","${v.cwe}","${v.location}","${v.description.replace(/"/g, '""')}"\n`;
-            });
-            return csv;
-        }
-
-        function convertToHTML(results) {
-            return `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Security Report - ${results.metadata.fileName}</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; }
-        h1 { color: #333; }
-        .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 30px 0; }
-        .summary-card { padding: 20px; border-radius: 8px; text-align: center; }
-        .critical { background: #fee; border: 2px solid #f00; }
-        .high { background: #ffeaa7; border: 2px solid #ff9800; }
-        .medium { background: #e3f2fd; border: 2px solid #2196f3; }
-        .low { background: #e8f5e9; border: 2px solid #4caf50; }
-        .vuln { margin: 20px 0; padding: 20px; border-left: 4px solid #ccc; background: #f9f9f9; }
-        .evidence { background: #f0f0f0; padding: 10px; border-radius: 4px; font-family: monospace; margin: 10px 0; white-space: pre-wrap; }
-        .section-title { font-weight: bold; margin-top: 15px; color: #555; }
-        .code-example { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 4px; font-family: monospace; margin: 10px 0; white-space: pre-wrap; overflow-x: auto; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>APK Security Analysis Report</h1>
-        <p><strong>File:</strong> ${results.metadata.fileName}</p>
-        <p><strong>Scan Date:</strong> ${new Date(results.metadata.scanDate).toLocaleString()}</p>
-        <div class="summary">
-            <div class="summary-card critical"><h2>${results.summary.critical}</h2><p>Critical</p></div>
-            <div class="summary-card high"><h2>${results.summary.high}</h2><p>High</p></div>
-            <div class="summary-card medium"><h2>${results.summary.medium}</h2><p>Medium</p></div>
-            <div class="summary-card low"><h2>${results.summary.low}</h2><p>Low</p></div>
-        </div>
-        <h2>Vulnerabilities</h2>
-        ${results.vulnerabilities.map(v => `
-            <div class="vuln">
-                <h3>${v.title} <span style="color: #999;">[${v.severity.toUpperCase()}]</span></h3>
-                <p><strong>OWASP:</strong> ${v.owasp} | <strong>CWE:</strong> ${v.cwe}</p>
-                
-                ${v.locations && v.locations.length > 0 ? `
-                <p><strong>Found in ${v.locations.length} Location${v.locations.length > 1 ? 's' : ''}:</strong></p>
-                <ul style="margin: 10px 0; padding-left: 25px;">
-                    ${v.locations.map(loc => `<li>${loc}</li>`).join('')}
-                </ul>
-                ` : `<p><strong>Location:</strong> ${v.location}</p>`}
-                
-                <div class="section-title">Description:</div>
-                <p>${v.description}</p>
-                
-                ${v.evidences && v.evidences.length > 0 ? `
-                <div class="section-title">Evidence${v.evidences.length > 1 ? 's' : ''}:</div>
-                ${v.evidences.map(ev => `<div class="evidence">${ev}</div>`).join('')}
-                ` : v.evidence ? `
-                <div class="section-title">Evidence:</div>
-                <div class="evidence">${v.evidence}</div>
-                ` : ''}
-                
-                ${v.impact ? `
-                <div class="section-title">Impact:</div>
-                <p>${v.impact}</p>
-                ` : ''}
-                
-                <div class="section-title">Remediation:</div>
-                <p>${formatRemediationText(v.remediation)}</p>
-            </div>
-        `).join('')}
-    </div>
-</body>
-</html>`;
-        }
-
-        function formatRemediationText(text) {
-            if (!text) return 'Remediation steps not specified';
-            // Wrap code blocks in proper formatting (detect code patterns)
-            return text.replace(/```([\s\S]*?)```/g, '<div class="code-example">$1</div>')
-                       .replace(/`([^`]+)`/g, '<code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: monospace;">$1</code>')
-                       .replace(/\n/g, '<br>');
-        }
-
-        function cancelScan() {
-            if (currentAbortController) {
-                currentAbortController.abort();
-                currentAbortController = null;
-            }
-            if (currentScanInterval) {
-                clearInterval(currentScanInterval);
-                currentScanInterval = null;
-            }
-        }
-
-        function saveScanToHistory(results) {
-            console.log('Saving scan to history:', results);
-            let history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
-            
-            // Add new scan to beginning
-            const historyEntry = {
-                fileName: results.metadata.fileName,
-                scanDate: results.metadata.scanDate,
-                summary: results.summary,
-                totalVulnerabilities: results.summary.total_vulnerabilities,
-                timestamp: Date.now()
-            };
-            
-            console.log('History entry:', historyEntry);
-            history.unshift(historyEntry);
-            
-            // Keep only last 10 scans
-            history = history.slice(0, 10);
-            
-            localStorage.setItem('scanHistory', JSON.stringify(history));
-            console.log('History saved to localStorage:', history);
-        }
-
-        function loadScanHistory() {
-            const history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
-            console.log('Loading scan history:', history);
-            const historyContainer = document.getElementById('historyContainer');
-            
-            if (!historyContainer) {
-                console.error('History container not found!');
-                return;
-            }
-            
-            if (history.length === 0) {
-                historyContainer.innerHTML = `
-                    <div style="background: var(--bg-secondary); padding: 3rem; border-radius: 12px; text-align: center;">
-                        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📋</div>
-                        <div style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 1rem;">No scan history available yet</div>
-                        <div style="color: var(--text-muted);">Your completed scans will appear here for easy reference</div>
-                    </div>
-                `;
-            } else {
-                historyContainer.innerHTML = history.map((scan, index) => `
-                    <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent-primary); margin-bottom: 1.5rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                            <div>
-                                <h3 style="color: var(--accent-primary); margin-bottom: 0.5rem; font-size: 1.2rem;">${scan.fileName}</h3>
-                                <div style="color: var(--text-secondary); font-size: 0.9rem;">
-                                    ${new Date(scan.scanDate).toLocaleString()}
-                                </div>
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1rem;">
-                            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-danger);">${scan.summary.critical}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Critical</div>
-                            </div>
-                            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-warning);">${scan.summary.high}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">High</div>
-                            </div>
-                            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-primary);">${scan.summary.medium}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Medium</div>
-                            </div>
-                            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-success);">${scan.summary.low}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Low</div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function resetScanner() {
-            uploadedFile = null;
-            scanResults = null;
-            document.getElementById('exportScreen').classList.add('hidden');
-            document.getElementById('vulnerabilitiesScreen').classList.add('hidden');
-            document.getElementById('resultsScreen').classList.add('hidden');
-            document.getElementById('uploadScreen').classList.remove('hidden');
-            document.getElementById('fileInfo').classList.remove('active');
-            document.getElementById('startScanBtn').disabled = true;
-            document.getElementById('fileInput').value = '';
-        }
-
-        function showNotification(text, type = 'success') {
-            const notification = document.getElementById('notification');
-            const icon = document.getElementById('notificationIcon');
-            
-            icon.textContent = type === 'success' ? '✓' : '⚠';
-            document.getElementById('notificationText').textContent = text;
-            
-            notification.className = 'notification active';
-            if (type === 'error') {
-                notification.classList.add('error');
-            }
-            
-            setTimeout(() => {
-                notification.classList.remove('active');
-            }, 3000);
-        }
-
-        function toggleHighContrast() {
-            const isHighContrast = document.getElementById('highContrastToggle').checked;
-            const root = document.documentElement;
-            
-            if (isHighContrast) {
-                // High contrast mode - light theme
-                root.style.setProperty('--bg-primary', '#f5f5f5');
-                root.style.setProperty('--bg-secondary', '#ffffff');
-                root.style.setProperty('--bg-tertiary', '#e5e7eb');
-                root.style.setProperty('--accent-primary', '#0066cc');
-                root.style.setProperty('--accent-secondary', '#6d28d9');
-                root.style.setProperty('--accent-danger', '#dc2626');
-                root.style.setProperty('--accent-warning', '#d97706');
-                root.style.setProperty('--accent-success', '#059669');
-                root.style.setProperty('--text-primary', '#1f2937');
-                root.style.setProperty('--text-secondary', '#4b5563');
-                root.style.setProperty('--text-muted', '#6b7280');
-                root.style.setProperty('--border', '#d1d5db');
-            } else {
-                // Normal dark mode
-                root.style.setProperty('--bg-primary', '#0a0e17');
-                root.style.setProperty('--bg-secondary', '#131824');
-                root.style.setProperty('--bg-tertiary', '#1a2030');
-                root.style.setProperty('--accent-primary', '#00d9ff');
-                root.style.setProperty('--accent-secondary', '#7c3aed');
-                root.style.setProperty('--accent-danger', '#ef4444');
-                root.style.setProperty('--accent-warning', '#f59e0b');
-                root.style.setProperty('--accent-success', '#10b981');
-                root.style.setProperty('--text-primary', '#e5e7eb');
-                root.style.setProperty('--text-secondary', '#9ca3af');
-                root.style.setProperty('--text-muted', '#6b7280');
-                root.style.setProperty('--border', '#2d3748');
-            }
-            
-            // Save preference to localStorage
-            localStorage.setItem('highContrastMode', isHighContrast);
-        }
-
-        // Load saved preference on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedPreference = localStorage.getItem('highContrastMode');
-            if (savedPreference === 'true') {
-                document.getElementById('highContrastToggle').checked = true;
-                toggleHighContrast();
-            }
-        });
-    </script>
+function loadHistory(){ try{ return JSON.parse(localStorage.getItem("xray_history")||"[]"); }catch{ return []; } }
+function saveHistory(rep){
+  try{
+    const h=loadHistory().filter(x=>x.sha!==rep.file_hash_sha256);
+    h.unshift({sha:rep.file_hash_sha256, name:rep.app_name, pkg:rep.package_name, grade:rep.security.grade, score:rep.security.score, mal:rep.malware.label, at:Date.now()});
+    localStorage.setItem("xray_history", JSON.stringify(h.slice(0,8)));
+    try{ localStorage.setItem("xray_report_"+rep.file_hash_sha256, JSON.stringify(rep)); }catch{}
+    const keep=new Set(h.slice(0,4).map(x=>"xray_report_"+x.sha));
+    Object.keys(localStorage).filter(k=>k.startsWith("xray_report_")&&!keep.has(k)).forEach(k=>localStorage.removeItem(k));
+  }catch{}
+  renderHistory();
+}
+function renderHistory(){
+  const h=loadHistory(); $("#history").hidden=!h.length;
+  $("#hist-list").innerHTML=h.map(x=>`<button class="hist" data-sha="${esc(x.sha)}"><span class="g" style="color:${{A:"var(--ok)",B:"var(--low)",C:"var(--med)",D:"var(--high)",F:"var(--crit)"}[x.grade]}">${esc(x.grade)}</span><span style="text-align:left"><b>${esc(x.name)}</b><small>${esc(x.pkg)}</small><small>${esc(x.mal)}, ${new Date(x.at).toLocaleDateString()}</small></span></button>`).join("");
+  document.querySelectorAll(".hist").forEach(b=>b.onclick=()=>{ let rep=null; try{ rep=JSON.parse(localStorage.getItem("xray_report_"+b.dataset.sha)); }catch{}
+    if(rep){ state.jobId=null; showReport(rep, false); } else toast("That report is no longer stored in this browser. Scan the file again.", true); });
+}
+renderHistory();
+</script>
 </body>
 </html>
